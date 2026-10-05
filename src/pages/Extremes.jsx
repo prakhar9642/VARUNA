@@ -45,7 +45,6 @@ export default function Extremes() {
 
   useEffect(() => {
     let active = true;
-    setFetchStatus('LOADING');
     Promise.all(
       REGIONS.map(r => 
         fetchExtremes({ region: r.id, leadTime: '48h' })
@@ -68,10 +67,9 @@ export default function Extremes() {
           if (alert.hazard === 'heatwave') type = 'Severe Heatwave';
           if (alert.hazard === 'wind_squall') type = 'Coastal Squall Winds';
           
-          const isTemp = alert.hazard === 'heatwave';
-          const thresholdStandard = isTemp
-            ? `Threshold standard: ${alert.threshold_label} · Temperature blend has a held-out ERA5 benchmark.`
-            : `Threshold standard: ${alert.threshold_label} · Operational equal-weight consensus; no held-out ML benchmark.`;
+          const thresholdStandard = alert.validated
+            ? `Threshold standard: ${alert.threshold_label} · Blend has a held-out ERA5 benchmark.`
+            : `Threshold standard: ${alert.threshold_label} · Operational equal-weight consensus; held-out ML validation not passed.`;
 
           mapped.push({
             id: res.region.id + '-' + alert.hazard,

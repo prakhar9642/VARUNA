@@ -3,8 +3,8 @@
 
 [![Live Frontend](https://img.shields.io/badge/Production%20Frontend-Vercel-blue?style=flat-square&logo=vercel)](https://varuna-rose.vercel.app)
 [![Production Backend](https://img.shields.io/badge/Production%20API-Render-46E3B7?style=flat-square&logo=render)](https://varuna-backend-grfc.onrender.com/api/health)
-[![Scientific Audit Tests](https://img.shields.io/badge/Scientific%20Tests-8%2F8%20Passed-emerald?style=flat-square)](src/ml/scientific_audit.test.js)
-[![Backend Tests](https://img.shields.io/badge/Backend%20Pytest-165%20Passed-emerald?style=flat-square)](varuna-backend/tests)
+[![Scientific Audit Tests](https://img.shields.io/badge/Scientific%20Tests-10%2F10%20Passed-emerald?style=flat-square)](src/ml/scientific_audit.test.js)
+[![Backend Tests](https://img.shields.io/badge/Backend%20Pytest-184%20Passed-emerald?style=flat-square)](varuna-backend/tests)
 [![License](https://img.shields.io/badge/License-MIT-gray?style=flat-square)](LICENSE)
 
 > **Live Deployments:**  
@@ -118,7 +118,7 @@ VARUNA evaluates four independent numerical weather and machine learning models:
 
 ## 4. Adaptive Weighting Methodology
 
-For 2m Temperature, VARUNA executes a rigorous 5-step scientific weighting pipeline:
+For validated variables (2m Temperature and Surface Pressure), VARUNA executes a rigorous 5-step scientific weighting pipeline:
 
 ### Step 1: 11-Feature Synoptic Context Vector
 For each target region, lead time, and forecast hour, VARUNA constructs an 11-dimensional feature vector $x$:
@@ -162,13 +162,14 @@ To maintain strict scientific integrity, VARUNA distinguishes between validated 
 
 | Atmospheric Variable | Operational Stream | Weighting Scheme | Validation Status | Benchmark Reference |
 | :--- | :--- | :--- | :--- | :--- |
-| **2m Temperature** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.78^\circ\text{C}$ RMSE) |
-| **Rainfall (Precipitation)** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated** | Baseline consensus (pending Phase 4 ML) |
-| **10m Wind Speed** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated** | Baseline consensus (pending Phase 4 ML) |
-| **Surface Pressure** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated** | Baseline consensus (pending Phase 4 ML) |
+| **2m Temperature** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.780^\circ\text{C}$ RMSE, $+29.4\%$ vs best NWP) |
+| **Surface Pressure** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.674\text{ hPa}$ RMSE, $+9.9\%$ vs best NWP) |
+| **10m Wind Speed** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated (Gate Failed)** | Held-Out ERA5 ($N=4,512$, $2.137\text{ km/h}$ RMSE; adaptive underperformed equal blend) |
+| **Rainfall (Precipitation)** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated (Gate Failed)** | Held-Out ERA5 ($N=4,512$, $0.282\text{ mm}$ RMSE; wet-event hit rate dropped 89.2% → 75.2%) |
 
 ### Boundaries & Commitments:
-- **No False ML Claims:** We do NOT claim that rainfall, wind speed, or surface pressure use machine learning or adaptive weighting. They operate on equal-weight multi-model consensus and are clearly marked as unvalidated in the API and UI.
+- **Truthful Validation Gating:** Adaptive XGBoost weighting is strictly activated for validated variables (**Temperature** and **Surface Pressure**), which empirically beat all single NWPs and baseline consensus on held-out test data. **Rainfall** and **Wind Speed** meta-models were fully trained and evaluated, but failed held-out promotion gates and remain strictly on operational equal-weight consensus.
+- **No False Promotion Claims:** We do NOT claim operational ML promotion where empirical gates failed. Wind speed and rainfall models are preserved for auditability and research, while the operational stream runs pure equal consensus.
 - **No Claim to Replace IMD:** VARUNA is an automated multi-model decision support tool. It does not replace official India Meteorological Department (IMD) synoptic forecasts or statutory disaster management bulletins.
 
 ---
@@ -255,19 +256,45 @@ VARUNA monitors blended forecasts against IMD statutory thresholds:
 
 ## 10. Empirical Verification Protocol
 
-All historical statistical validation is conducted against the **ERA5 reanalysis dataset** (ECMWF Copernicus):
+All historical statistical validation is conducted against the **ERA5 reanalysis dataset** (ECMWF Copernicus) across 86,004 authentic observation rows across 6 benchmark regions, 4 forecast windows, and 4 synoptic forecast horizons (+24h, +48h, +72h, +120h):
 
-- **Temporal Partitioning:** Chronological split (no random shuffling):
-  - **Training Partition (65%):** 13,170 rows (Jan 10 – Jul 10, 2026)
-  - **Validation Partition (15%):** 3,360 rows (Jul 10 – Sep 1, 2026)
-  - **Strict Held-Out Test Partition (20%):** 4,512 rows (Sep 1 – Sep 8, 2026)
-- **Held-Out Temperature Benchmark Results (Post-Monsoon, $N=4,512$):**
-  - **ECMWF IFS (Best NWP):** RMSE $1.061^\circ\text{C}$ | MAE $0.805^\circ\text{C}$ | Bias $-0.249^\circ\text{C}$ | Pearson $r = 0.976$
-  - **ECMWF AIFS:** RMSE $1.621^\circ\text{C}$ | MAE $1.233^\circ\text{C}$ | Bias $+0.822^\circ\text{C}$ | Pearson $r = 0.972$
-  - **DWD ICON:** RMSE $1.286^\circ\text{C}$ | MAE $1.001^\circ\text{C}$ | Bias $+0.368^\circ\text{C}$ | Pearson $r = 0.966$
-  - **NOAA GFS:** RMSE $2.284^\circ\text{C}$ | MAE $1.677^\circ\text{C}$ | Bias $+0.985^\circ\text{C}$ | Pearson $r = 0.934$
-  - **VARUNA ADAPTIVE BLEND:** **RMSE $0.8674^\circ\text{C}$** | **MAE $0.6539^\circ\text{C}$** | **Bias $+0.117^\circ\text{C}$** | **Pearson $r = 0.9837$**
-  - *Improvement:* **$-18.2\%$ reduction in RMSE** over the best single NWP model (ECMWF IFS).
+- **Temporal Partitioning:** Chronological split (no random shuffling; strict temporal leakage prevention):
+  - **Training Partition (65%):** 55,902 rows (13,170 per variable; Jan 10 – Jul 10, 2026)
+  - **Validation Partition (15%):** 14,268 rows (3,360 per variable; Jul 10 – Sep 1, 2026)
+  - **Strict Held-Out Test Partition (20%):** 18,048 rows (4,512 per variable; Sep 1 – Sep 8, 2026)
+
+### Multi-Variable Empirical Promotion Gate Summary ($N = 4,512$ held-out test records per variable):
+
+| Atmospheric Variable | Best Single NWP (RMSE) | Equal Blend (RMSE) | Static Inv-RMSE (RMSE) | VARUNA Adaptive (RMSE) | Improvement vs Best NWP | Held-Out Gate Decision | Operational Weighting Status |
+| :--- | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
+| **2m Temperature** | $1.105^\circ\text{C}$ (AIFS) | $0.960^\circ\text{C}$ | $0.787^\circ\text{C}$ | **$0.780^\circ\text{C}$** | **$+29.4\%$** | **PASS** | **Adaptive XGBoost** (`validated=true`) |
+| **Surface Pressure** | $0.748\text{ hPa}$ (ICON) | $0.838\text{ hPa}$ | $0.716\text{ hPa}$ | **$0.674\text{ hPa}$** | **$+9.9\%$** | **PASS** | **Adaptive XGBoost** (`validated=true`) |
+| **10m Wind Speed** | $2.427\text{ km/h}$ (AIFS) | **$2.137\text{ km/h}$** | $2.171\text{ km/h}$ | $2.224\text{ km/h}$ | $+8.4\%$ (vs AIFS)<br>*$-4.1\%$ vs Equal* | **FAIL** | **Equal Consensus** (`validated=false`) |
+| **Rainfall** | $0.323\text{ mm}$ (GFS) | $0.282\text{ mm}$ | $0.297\text{ mm}$ | $0.268\text{ mm}$ | $+17.0\%$ (vs GFS)<br>*Wet POD: $75.2\%$ vs $89.2\%$* | **FAIL** | **Equal Consensus** (`validated=false`) |
+
+### Detailed Validated Variables Breakdown (Post-Monsoon Held-Out Test, $N=4,512$):
+
+#### 2m Temperature (°C):
+- **ECMWF IFS:** RMSE $1.195^\circ\text{C}$ | MAE $0.924^\circ\text{C}$ | Bias $-0.561^\circ\text{C}$ | Pearson $r = 0.973$
+- **ECMWF AIFS (Best Single):** RMSE $1.105^\circ\text{C}$ | MAE $0.866^\circ\text{C}$ | Bias $+0.510^\circ\text{C}$ | Pearson $r = 0.981$
+- **DWD ICON:** RMSE $1.131^\circ\text{C}$ | MAE $0.876^\circ\text{C}$ | Bias $+0.056^\circ\text{C}$ | Pearson $r = 0.969$
+- **NOAA GFS:** RMSE $2.320^\circ\text{C}$ | MAE $1.874^\circ\text{C}$ | Bias $+0.674^\circ\text{C}$ | Pearson $r = 0.930$
+- **Equal-Weight Blend:** RMSE $0.960^\circ\text{C}$ | MAE $0.759^\circ\text{C}$ | Bias $+0.170^\circ\text{C}$ | Pearson $r = 0.978$
+- **VARUNA ADAPTIVE BLEND:** **RMSE $0.780^\circ\text{C}$** | **MAE $0.612^\circ\text{C}$** | **Bias $+0.066^\circ\text{C}$** | **Pearson $r = 0.984$**
+- *Empirical Margin:* **$+29.4\%$ RMSE reduction** vs best single NWP ($1.105 \to 0.780^\circ\text{C}$); **$+18.7\%$ reduction** vs equal blend.
+
+#### Surface Pressure (hPa):
+- **ECMWF IFS:** RMSE $0.932\text{ hPa}$ | MAE $0.751\text{ hPa}$ | Bias $-0.692\text{ hPa}$ | Pearson $r = 1.000$
+- **ECMWF AIFS:** RMSE $0.809\text{ hPa}$ | MAE $0.637\text{ hPa}$ | Bias $-0.257\text{ hPa}$ | Pearson $r = 1.000$
+- **DWD ICON (Best Single):** RMSE $0.748\text{ hPa}$ | MAE $0.602\text{ hPa}$ | Bias $-0.483\text{ hPa}$ | Pearson $r = 1.000$
+- **NOAA GFS:** RMSE $1.763\text{ hPa}$ | MAE $1.459\text{ hPa}$ | Bias $-1.399\text{ hPa}$ | Pearson $r = 1.000$
+- **Equal-Weight Blend:** RMSE $0.838\text{ hPa}$ | MAE $0.727\text{ hPa}$ | Bias $-0.708\text{ hPa}$ | Pearson $r = 1.000$
+- **VARUNA ADAPTIVE BLEND:** **RMSE $0.674\text{ hPa}$** | **MAE $0.540\text{ hPa}$** | **Bias $-0.450\text{ hPa}$** | **Pearson $r = 1.000$**
+- *Empirical Margin:* **$+9.9\%$ RMSE reduction** vs best single NWP ($0.748 \to 0.674\text{ hPa}$); **$+19.5\%$ reduction** vs equal blend.
+
+### Scientific Rationale for Unvalidated Baseline Consensuses:
+1. **Rainfall Zero-Inflation Degradation:** With 57.5% zero-inflation, continuous XGBoost minimizes global squared error by predicting near-zero values during light rain. Contingency analysis shows that while global RMSE improves slightly, Probability of Detection (POD) for wet events drops catastrophically from **89.2% (equal blend)** to **75.2% (adaptive XGBoost)**, missing 475 actual rain events (vs 206 for equal blend). At +24h lead, adaptive RMSE ($0.257\text{ mm}$) underperforms equal blend ($0.237\text{ mm}$). Gating protocol triggered an immediate **FAIL**, retaining operational equal-weight consensus.
+2. **Wind Speed Sub-Optimal Weighting:** While the wind speed adaptive model outperforms single NWP centers, it underperforms simple equal-weight consensus across all lead times (+24h: 2.05 vs 1.98 km/h; +48h: 2.11 vs 1.99 km/h; +72h: 2.28 vs 2.20 km/h; +120h: 2.43 vs 2.36 km/h) and exhibits high-wind degradation ($\ge 25\text{ km/h}$, RMSE 3.09 vs 2.49 km/h). Gating protocol triggered **FAIL**, maintaining operational equal-weight consensus ($2.137\text{ km/h}$ RMSE).
 
 ---
 
@@ -333,7 +360,7 @@ npm run build
 ```
 
 ### Backend Unit & Integration Tests
-Runs 165 network-free tests with monkeypatched provider fixtures:
+Runs 184 network-free tests with monkeypatched provider fixtures (including 19 dedicated multi-variable validation tests):
 ```powershell
 cd varuna-backend
 python -m pytest tests -q -p no:asyncio
@@ -372,9 +399,9 @@ prakhar9642/VARUNA/
 │   │   └── main.py                    # App entry point, CORS middleware, lifespan
 │   ├── data/                          # Aligned historical data, replay archives, provenance
 │   ├── docs/                          # ARCHITECTURE, DATA_PROVENANCE, LIMITATIONS, VALIDATION_PROTOCOL
-│   ├── models/                        # Serialized XGBoost meta-model bundle (joblib)
-│   ├── reports/                       # Verification CSV reports and feature importance plots
-│   └── tests/                         # 165 network-free pytest tests
+│   ├── models/                        # Serialized XGBoost meta-model bundles (joblib) across all 4 variables
+│   ├── reports/                       # Multi-variable verification CSV reports, summary, and markdown reports
+│   └── tests/                         # 184 network-free pytest tests
 ├── docs/                              # Architectural documentation and UI audit reports
 ├── verify_production_e2e.mjs          # Authoritative production E2E acceptance script
 ├── vercel.json                        # Vercel deployment routing configuration
@@ -388,7 +415,7 @@ prakhar9642/VARUNA/
 
 As detailed in [`varuna-backend/docs/LIMITATIONS.md`](varuna-backend/docs/LIMITATIONS.md), the following are structural constraints of the current system:
 1. **Single-Season Held-Out Partition:** The chronological held-out test partition ($N=4,512$) covers Post-Monsoon (Sep 1–8, 2026). It must not be cited as verified performance across all seasons.
-2. **Temperature-Only Validated Meta-Model:** Adaptive weighting is trained and validated strictly for 2m temperature. Rainfall, wind speed, and surface pressure operate on unvalidated equal-weight consensus.
+2. **Multi-Variable Promotion Gating:** Adaptive weighting is validated and operational for 2m temperature and surface pressure. Rainfall and wind speed models were trained and benchmarked, but truthfully retained on operational equal-weight consensus because they failed held-out promotion criteria (rainfall suppressed wet events; wind speed underperformed equal-weight consensus).
 3. **Reanalysis vs In-Situ Ground Truth:** Verification uses ERA5 grid reanalysis as the truth proxy. It does not reflect direct AWS station observation data.
 4. **Effective Sample Size:** While the test set contains 4,512 paired records, spatial and temporal auto-correlation reduces effective synoptic independence to ~188 distinct weather situations.
 5. **GFS Outlier Influence:** NOAA GFS exhibits persistent positive temperature bias (+0.985 °C) across Indian regions. While Hamilton–Hare correctly downweights it (median ~10%), it widens inter-model spread metrics.

@@ -1,0 +1,155 @@
+region_id,season,lead_time_hours,regime,regime_index,ecmwf_ifs_weight,ecmwf_aifs_weight,ncep_gfs_weight,dwd_icon_weight,ecmwf_ifs_predicted_error,ecmwf_aifs_predicted_error,ncep_gfs_predicted_error,dwd_icon_predicted_error,weights_sum,n_rows,scope,variable
+bengaluru_deccan,monsoon,24,Monsoonal Break,1,21,23,31,25,0.0842,0.0804,0.0685,0.0758,100,360,full_dataset_all_splits,rainfall
+bengaluru_deccan,monsoon,48,Monsoonal Break,1,24,14,31,31,0.0689,0.0911,0.0609,0.0602,100,360,full_dataset_all_splits,rainfall
+bengaluru_deccan,monsoon,72,Monsoonal Break,1,22,16,31,31,0.0746,0.087,0.0628,0.0626,100,360,full_dataset_all_splits,rainfall
+bengaluru_deccan,monsoon,120,Monsoonal Break,1,20,16,33,31,0.0728,0.0803,0.0566,0.058,100,360,full_dataset_all_splits,rainfall
+bengaluru_deccan,post_monsoon,24,Monsoonal Break,1,19,18,23,40,0.0475,0.0485,0.0422,0.0326,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,post_monsoon,48,Monsoonal Break,1,21,21,22,36,0.0317,0.032,0.0307,0.0244,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,post_monsoon,72,Monsoonal Break,1,22,19,21,38,0.0356,0.0379,0.0359,0.027,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,post_monsoon,120,Monsoonal Break,1,17,19,21,43,0.0389,0.0372,0.0353,0.0244,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,24,Monsoonal Break,1,16,35,20,29,0.0268,0.0183,0.0241,0.0202,100,61,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,24,Pre-Monsoon Convective,3,17,36,17,30,0.0268,0.0183,0.0262,0.0202,100,54,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,48,Monsoonal Break,1,16,35,20,29,0.0268,0.0183,0.024,0.0202,100,59,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,48,Pre-Monsoon Convective,3,17,36,17,30,0.0268,0.0183,0.0262,0.0202,100,56,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,72,Monsoonal Break,1,21,35,17,27,0.0363,0.0278,0.0404,0.0322,100,99,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,72,Pre-Monsoon Convective,3,18,47,17,18,0.0331,0.0203,0.0335,0.0323,100,93,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,120,Monsoonal Break,1,16,36,20,28,0.0277,0.0183,0.0245,0.0211,100,92,full_dataset_all_splits,rainfall
+bengaluru_deccan,pre_monsoon,120,Pre-Monsoon Convective,3,16,39,17,28,0.0282,0.0183,0.0278,0.0216,100,89,full_dataset_all_splits,rainfall
+bengaluru_deccan,winter,24,Pre-Monsoon Convective,3,18,44,22,16,0.0516,0.033,0.0465,0.0554,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,winter,48,Pre-Monsoon Convective,3,22,36,14,28,0.0562,0.0444,0.0699,0.0504,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,winter,72,Pre-Monsoon Convective,3,21,25,24,30,0.0393,0.0356,0.0365,0.033,100,192,full_dataset_all_splits,rainfall
+bengaluru_deccan,winter,120,Pre-Monsoon Convective,3,17,25,26,32,0.0558,0.0469,0.0461,0.0411,100,192,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,24,Monsoonal Active Surge,0,23,24,41,12,7.7445,7.721,5.8533,10.7227,100,16,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,24,Monsoonal Break,1,29,36,21,14,0.3538,0.3177,0.4226,0.5108,100,344,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,48,Monsoonal Active Surge,0,6,90,3,1,2.8441,0.7479,3.8472,8.4219,100,4,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,48,Monsoonal Break,1,22,26,29,23,0.74,0.6835,0.6474,0.7372,100,356,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,72,Monsoonal Active Surge,0,32,56,11,1,1.6345,1.2275,2.7713,8.0866,100,20,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,72,Monsoonal Break,1,27,26,28,19,0.6903,0.6996,0.6834,0.8199,100,340,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,120,Monsoonal Active Surge,0,30,28,32,10,2.3353,2.3814,2.2402,4.0757,100,9,full_dataset_all_splits,rainfall
+delhi_ncr,monsoon,120,Monsoonal Break,1,27,24,31,18,0.6279,0.6707,0.5889,0.7609,100,351,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,24,Monsoonal Break,1,28,3,40,29,0.4137,1.3437,0.3503,0.4112,100,192,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,48,Monsoonal Active Surge,0,35,4,42,19,4.6506,13.472,4.2314,6.1832,100,2,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,48,Monsoonal Break,1,29,6,35,30,0.6966,1.5495,0.6296,0.6735,100,190,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,72,Monsoonal Active Surge,0,3,1,96,0,0.9704,2.1374,0.1699,2.6044,100,3,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,72,Monsoonal Break,1,32,8,33,27,0.4789,0.9942,0.4774,0.5239,100,189,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,120,Monsoonal Active Surge,0,19,4,70,7,4.3672,10.0067,2.291,7.5628,100,3,full_dataset_all_splits,rainfall
+delhi_ncr,post_monsoon,120,Monsoonal Break,1,35,6,38,21,0.5912,1.484,0.5734,0.768,100,189,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,24,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0242,0.0202,100,46,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,24,Pre-Monsoon Convective,3,32,36,14,18,0.0183,0.0171,0.0277,0.0239,100,69,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,48,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0242,0.0202,100,46,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,48,Pre-Monsoon Convective,3,36,23,17,24,0.0201,0.0251,0.0298,0.025,100,69,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,72,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.024,0.0202,100,94,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,72,Pre-Monsoon Convective,3,40,18,18,24,0.02,0.0295,0.0299,0.0257,100,98,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,120,Monsoonal Break,1,32,30,16,22,0.0165,0.0171,0.0238,0.0202,100,87,full_dataset_all_splits,rainfall
+delhi_ncr,pre_monsoon,120,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0258,0.0202,100,94,full_dataset_all_splits,rainfall
+delhi_ncr,winter,24,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,7,full_dataset_all_splits,rainfall
+delhi_ncr,winter,24,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,185,full_dataset_all_splits,rainfall
+delhi_ncr,winter,48,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,8,full_dataset_all_splits,rainfall
+delhi_ncr,winter,48,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,184,full_dataset_all_splits,rainfall
+delhi_ncr,winter,72,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,7,full_dataset_all_splits,rainfall
+delhi_ncr,winter,72,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,185,full_dataset_all_splits,rainfall
+delhi_ncr,winter,120,Pre-Monsoon Convective,3,33,31,13,23,0.0166,0.0171,0.0262,0.0202,100,5,full_dataset_all_splits,rainfall
+delhi_ncr,winter,120,Western Disturbance,2,31,38,15,16,0.0189,0.0171,0.0274,0.026,100,187,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,24,Monsoonal Active Surge,0,31,34,14,21,4.2515,4.0494,6.4181,5.1946,100,169,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,24,Monsoonal Break,1,20,34,17,29,0.2827,0.2166,0.3057,0.2374,100,191,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,48,Monsoonal Active Surge,0,27,29,24,20,4.6086,4.4543,4.9044,5.3857,100,140,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,48,Monsoonal Break,1,25,19,21,35,0.4435,0.5008,0.484,0.3714,100,220,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,72,Monsoonal Active Surge,0,28,32,23,17,4.7032,4.3917,5.2174,5.9322,100,148,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,72,Monsoonal Break,1,22,30,18,30,0.4033,0.3444,0.4433,0.3484,100,212,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,120,Monsoonal Active Surge,0,24,33,21,22,5.3097,4.5112,5.5998,5.5552,100,124,full_dataset_all_splits,rainfall
+mumbai_coastal,monsoon,120,Monsoonal Break,1,25,25,22,28,0.6452,0.6382,0.6883,0.6122,100,236,full_dataset_all_splits,rainfall
+mumbai_coastal,post_monsoon,24,Monsoonal Break,1,14,19,22,45,0.2264,0.1886,0.1792,0.1243,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,post_monsoon,48,Monsoonal Break,1,16,18,21,45,0.1996,0.1867,0.1745,0.119,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,post_monsoon,72,Monsoonal Break,1,15,23,21,41,0.2213,0.1801,0.1872,0.1359,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,post_monsoon,120,Monsoonal Break,1,16,23,23,38,0.2227,0.1875,0.1875,0.1457,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,24,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0243,0.0202,100,61,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,24,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.026,0.0202,100,54,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,48,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0243,0.0202,100,63,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,48,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.026,0.0202,100,52,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,72,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.024,0.0202,100,102,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,72,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0259,0.0202,100,90,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,120,Monsoonal Break,1,32,30,16,22,0.0165,0.0171,0.0239,0.0202,100,90,full_dataset_all_splits,rainfall
+mumbai_coastal,pre_monsoon,120,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0258,0.0202,100,91,full_dataset_all_splits,rainfall
+mumbai_coastal,winter,24,Pre-Monsoon Convective,3,32,31,15,22,0.0169,0.0171,0.0252,0.0204,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,winter,48,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,winter,72,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+mumbai_coastal,winter,120,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,24,Monsoonal Active Surge,0,66,1,31,2,0.8547,8.4853,1.2459,5.4675,100,27,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,24,Monsoonal Break,1,36,7,38,19,0.4561,1.0791,0.444,0.6347,100,333,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,48,Monsoonal Active Surge,0,50,7,24,19,1.8135,4.9288,2.6025,2.9642,100,15,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,48,Monsoonal Break,1,46,7,31,16,0.4535,1.1899,0.5484,0.7618,100,345,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,72,Monsoonal Active Surge,0,56,2,37,5,1.0659,5.5339,1.2973,3.6421,100,30,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,72,Monsoonal Break,1,48,6,31,15,0.4112,1.1731,0.5186,0.7348,100,330,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,120,Monsoonal Active Surge,0,45,13,37,5,1.7607,3.2947,1.9542,5.0696,100,24,full_dataset_all_splits,rainfall
+odisha_coast,monsoon,120,Monsoonal Break,1,36,20,29,15,0.4356,0.595,0.49,0.6747,100,336,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,24,Monsoonal Active Surge,0,100,0,0,0,0.0,0.4959,0.2431,2.3387,100,1,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,24,Monsoonal Break,1,28,18,40,14,0.1477,0.1812,0.1218,0.2099,100,189,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,24,Post-Monsoon Depression,5,100,0,0,0,0.0,0.8572,0.9227,2.7914,100,2,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,48,Monsoonal Break,1,19,16,36,29,0.1852,0.206,0.1352,0.152,100,192,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,72,Monsoonal Break,1,24,13,37,26,0.1701,0.2294,0.1381,0.1633,100,191,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,72,Post-Monsoon Depression,5,50,0,50,0,0.0,0.6272,0.0,2.6131,100,1,full_dataset_all_splits,rainfall
+odisha_coast,post_monsoon,120,Monsoonal Break,1,26,13,36,25,0.188,0.2685,0.158,0.1885,100,192,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,24,Monsoonal Break,1,32,32,14,22,0.0171,0.0171,0.0258,0.0208,100,67,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,24,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.025,0.0202,100,48,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,48,Monsoonal Break,1,34,27,15,24,0.0178,0.0199,0.0265,0.0214,100,67,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,48,Pre-Monsoon Convective,3,37,22,18,23,0.0208,0.0267,0.0301,0.0262,100,48,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,72,Monsoonal Break,1,37,21,17,25,0.0199,0.0264,0.0288,0.0238,100,115,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,72,Pre-Monsoon Convective,3,17,25,26,32,0.0736,0.0602,0.0595,0.0529,100,77,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,120,Monsoonal Break,1,37,17,19,27,0.0224,0.0326,0.0314,0.0263,100,105,full_dataset_all_splits,rainfall
+odisha_coast,pre_monsoon,120,Pre-Monsoon Convective,3,40,11,22,27,0.032,0.0603,0.0427,0.0386,100,76,full_dataset_all_splits,rainfall
+odisha_coast,winter,24,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+odisha_coast,winter,48,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+odisha_coast,winter,72,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+odisha_coast,winter,120,Pre-Monsoon Convective,3,32,31,15,22,0.0167,0.0171,0.0249,0.0202,100,192,full_dataset_all_splits,rainfall
+rajasthan_thar,monsoon,24,Monsoonal Active Surge,0,33,33,0,34,0.0,0.0,7.2499,0.0,100,1,full_dataset_all_splits,rainfall
+rajasthan_thar,monsoon,24,Monsoonal Break,1,35,19,17,29,0.0551,0.0741,0.0797,0.061,100,359,full_dataset_all_splits,rainfall
+rajasthan_thar,monsoon,48,Monsoonal Break,1,30,31,16,23,0.0895,0.0883,0.1257,0.1029,100,360,full_dataset_all_splits,rainfall
+rajasthan_thar,monsoon,72,Monsoonal Active Surge,0,2,11,0,87,0.4565,0.1834,22.9817,0.0659,100,1,full_dataset_all_splits,rainfall
+rajasthan_thar,monsoon,72,Monsoonal Break,1,36,18,29,17,0.0629,0.0898,0.0704,0.092,100,359,full_dataset_all_splits,rainfall
+rajasthan_thar,monsoon,120,Monsoonal Break,1,44,21,22,13,0.0818,0.117,0.1169,0.1512,100,360,full_dataset_all_splits,rainfall
+rajasthan_thar,post_monsoon,24,Monsoonal Break,1,60,2,5,33,0.0031,0.0166,0.011,0.0043,100,192,full_dataset_all_splits,rainfall
+rajasthan_thar,post_monsoon,48,Monsoonal Break,1,64,0,0,36,0.0006,0.0164,0.0071,0.0008,100,192,full_dataset_all_splits,rainfall
+rajasthan_thar,post_monsoon,72,Monsoonal Break,1,17,1,2,80,0.0029,0.0164,0.0077,0.0013,100,192,full_dataset_all_splits,rainfall
+rajasthan_thar,post_monsoon,120,Monsoonal Break,1,88,1,5,6,0.0024,0.0193,0.0101,0.0093,100,192,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,24,Monsoonal Break,1,32,30,16,22,0.0165,0.0171,0.0237,0.0202,100,39,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,24,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0258,0.0202,100,75,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,24,Subtropical Heatwave,4,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,1,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,48,Monsoonal Break,1,32,30,16,22,0.0165,0.0171,0.0237,0.0202,100,40,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,48,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0258,0.0202,100,75,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,72,Monsoonal Break,1,32,30,16,22,0.0165,0.0171,0.0235,0.0202,100,81,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,72,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0259,0.0202,100,111,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,120,Monsoonal Break,1,32,30,16,22,0.0165,0.0171,0.0234,0.0202,100,75,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,120,Pre-Monsoon Convective,3,33,31,14,22,0.0165,0.0171,0.0259,0.0202,100,103,full_dataset_all_splits,rainfall
+rajasthan_thar,pre_monsoon,120,Subtropical Heatwave,4,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,3,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,24,Pre-Monsoon Convective,3,33,31,13,23,0.0167,0.0171,0.0262,0.0202,100,60,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,24,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0243,0.0202,100,132,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,48,Pre-Monsoon Convective,3,33,31,13,23,0.0167,0.0171,0.0262,0.0202,100,56,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,48,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0244,0.0202,100,136,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,72,Pre-Monsoon Convective,3,33,31,13,23,0.0167,0.0171,0.0262,0.0202,100,56,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,72,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0244,0.0202,100,136,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,120,Pre-Monsoon Convective,3,33,31,13,23,0.0167,0.0171,0.0262,0.0202,100,61,full_dataset_all_splits,rainfall
+rajasthan_thar,winter,120,Western Disturbance,2,32,31,15,22,0.0167,0.0171,0.0243,0.0202,100,131,full_dataset_all_splits,rainfall
+western_ghats,monsoon,24,Monsoonal Active Surge,0,33,44,8,15,1.6139,1.3837,3.2615,2.4182,100,119,full_dataset_all_splits,rainfall
+western_ghats,monsoon,24,Monsoonal Break,1,28,30,18,24,0.4063,0.3949,0.5064,0.4344,100,241,full_dataset_all_splits,rainfall
+western_ghats,monsoon,48,Monsoonal Active Surge,0,29,49,9,13,1.7019,1.3116,3.1065,2.5059,100,103,full_dataset_all_splits,rainfall
+western_ghats,monsoon,48,Monsoonal Break,1,26,27,23,24,0.4126,0.4046,0.4338,0.4302,100,257,full_dataset_all_splits,rainfall
+western_ghats,monsoon,72,Monsoonal Active Surge,0,26,53,9,12,2.039,1.4369,3.437,3.1061,100,100,full_dataset_all_splits,rainfall
+western_ghats,monsoon,72,Monsoonal Break,1,26,30,21,23,0.4382,0.4078,0.4772,0.4637,100,260,full_dataset_all_splits,rainfall
+western_ghats,monsoon,120,Monsoonal Active Surge,0,32,43,15,10,1.7258,1.4923,2.4857,3.0512,100,119,full_dataset_all_splits,rainfall
+western_ghats,monsoon,120,Monsoonal Break,1,25,27,25,23,0.4284,0.4089,0.4286,0.4464,100,241,full_dataset_all_splits,rainfall
+western_ghats,post_monsoon,24,Monsoonal Break,1,24,23,26,27,0.1675,0.1687,0.1585,0.1583,100,192,full_dataset_all_splits,rainfall
+western_ghats,post_monsoon,48,Monsoonal Break,1,21,23,30,26,0.1715,0.1653,0.1435,0.1565,100,192,full_dataset_all_splits,rainfall
+western_ghats,post_monsoon,72,Monsoonal Break,1,21,23,31,25,0.1863,0.1803,0.1561,0.1719,100,192,full_dataset_all_splits,rainfall
+western_ghats,post_monsoon,120,Monsoonal Break,1,17,27,30,26,0.2292,0.1795,0.1725,0.1838,100,192,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,24,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0246,0.0202,100,81,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,24,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,34,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,48,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0246,0.0202,100,81,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,48,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,34,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,72,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0244,0.0202,100,138,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,72,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,54,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,120,Monsoonal Break,1,33,30,15,22,0.0165,0.0171,0.0242,0.0202,100,126,full_dataset_all_splits,rainfall
+western_ghats,pre_monsoon,120,Pre-Monsoon Convective,3,33,31,13,23,0.0165,0.0171,0.0262,0.0202,100,55,full_dataset_all_splits,rainfall
+western_ghats,winter,24,Pre-Monsoon Convective,3,25,52,7,16,0.0295,0.0204,0.0556,0.0375,100,192,full_dataset_all_splits,rainfall
+western_ghats,winter,48,Pre-Monsoon Convective,3,22,38,16,24,0.0337,0.0257,0.0395,0.032,100,192,full_dataset_all_splits,rainfall
+western_ghats,winter,72,Pre-Monsoon Convective,3,12,50,15,23,0.0412,0.02,0.0356,0.0294,100,192,full_dataset_all_splits,rainfall
+western_ghats,winter,120,Pre-Monsoon Convective,3,25,32,17,26,0.0227,0.02,0.0275,0.0226,100,192,full_dataset_all_splits,rainfall

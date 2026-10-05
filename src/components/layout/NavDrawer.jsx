@@ -2,66 +2,7 @@ import { useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useStore } from '../../store/useStore';
-
-export const NAV_SECTIONS = [
-  {
-    category: 'OPERATIONS',
-    items: [
-      {
-        path: '/command-centre',
-        label: 'Command Centre',
-        description: 'Situational awareness & priority map',
-        icon: CommandIcon,
-      },
-      {
-        path: '/forecast',
-        label: 'Forecast Workspace',
-        description: 'Multi-model trajectories & timeline',
-        icon: CloudIcon,
-      },
-      {
-        path: '/extremes',
-        label: 'Extremes Watch',
-        description: 'IMD-calibrated meteorological hazards',
-        icon: AlertIcon,
-      },
-    ],
-  },
-  {
-    category: 'ANALYSIS',
-    items: [
-      {
-        path: '/explainability',
-        label: 'Explainability',
-        description: 'Adaptive weights & model attribution',
-        icon: BrainIcon,
-      },
-      {
-        path: '/models',
-        label: 'Models & Optimization',
-        description: '4-NWP physics & adaptive analysis',
-        icon: LayersIcon,
-      },
-      {
-        path: '/skill',
-        label: 'Verification Skill',
-        description: 'Held-out accuracy vs ERA5 reference',
-        icon: ChartIcon,
-      },
-    ],
-  },
-  {
-    category: 'SYSTEM',
-    items: [
-      {
-        path: '/system',
-        label: 'System & Gateway Health',
-        description: 'Open-Meteo gateway & pipeline telemetry',
-        icon: GearIcon,
-      },
-    ],
-  },
-];
+import { NAV_SECTIONS } from './navSections';
 
 export default function NavDrawer() {
   const location = useLocation();
@@ -161,7 +102,7 @@ export default function NavDrawer() {
                     const isActive =
                       location.pathname === item.path ||
                       (item.path === '/command-centre' && (location.pathname === '/' || location.pathname === '/dashboard' || location.pathname === '/map'));
-                    const Icon = item.icon;
+                    const Icon = ICON_MAP[item.icon] || CommandIcon;
 
                     return (
                       <NavLink
@@ -232,26 +173,6 @@ function CloudIcon({ size = 18, active }) {
   );
 }
 
-function LayersIcon({ size = 18, active }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 2 7 12 12 22 7 12 2" />
-      <polyline points="2 17 12 22 22 17" />
-      <polyline points="2 12 12 17 22 12" />
-    </svg>
-  );
-}
-
-function ChartIcon({ size = 18, active }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
-  );
-}
-
 function AlertIcon({ size = 18, active }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -272,6 +193,26 @@ function BrainIcon({ size = 18, active }) {
   );
 }
 
+function LayersIcon({ size = 18, active }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
+
+function ChartIcon({ size = 18, active }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
 function GearIcon({ size = 18, active }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -280,3 +221,14 @@ function GearIcon({ size = 18, active }) {
     </svg>
   );
 }
+
+const ICON_MAP = {
+  command: CommandIcon,
+  cloud: CloudIcon,
+  alert: AlertIcon,
+  brain: BrainIcon,
+  layers: LayersIcon,
+  chart: ChartIcon,
+  gear: GearIcon,
+};
+

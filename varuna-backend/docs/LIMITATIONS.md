@@ -21,14 +21,15 @@ the Post-Monsoon window (Sep 1–8, 2026)**. The headline table
 `scope: full_dataset_all_splits` precisely because they include the training
 rows and are *not* held-out evidence.
 
-## 2. Only temperature is trained and validated
+## 2. Multi-variable validation status: temperature & pressure validated; wind & rainfall on consensus
 
-`rainfall`, `wind_speed` and `pressure` are served live with
-`validated: false` and `weighting_scheme: equal_fallback_untrained` — equal
-integer weights over the available members. There is no meta-model for them in
-this build (Phase 4 only trains a variable whose held-out table beats the best
-single model). Any UI element that shows adaptive weights for these variables
-would be fabricated; the API refuses to imply it.
+Following rigorous held-out test evaluation ($N = 4,512$ chronological post-monsoon records):
+- **Temperature (`temperature`):** Validated and promoted to Adaptive XGBoost (held-out RMSE 0.780 °C, +29.4% improvement over best single NWP center, +18.7% over equal blend).
+- **Surface Pressure (`pressure`):** Validated and promoted to Adaptive XGBoost (held-out RMSE 0.674 hPa, +9.9% improvement over best single NWP center DWD ICON, +19.5% over equal blend, Pearson $r = 1.000$).
+- **Wind Speed (`wind_speed`):** Held-out gate **NOT passed**; served live with `validated: false` and `weighting_scheme: equal_fallback_untrained` (25% each). The adaptive model underperforms equal-weight consensus (-4.06% worse RMSE across all leads: 2.224 km/h vs 2.137 km/h) and degrades significantly on the top 10% high-wind decile (RMSE 3.09 vs 2.49 km/h).
+- **Precipitation (`rainfall`):** Held-out gate **NOT passed**; served live with `validated: false` and `weighting_scheme: equal_fallback_untrained` (25% each). Heavy zero-inflation (57.5% dry hours) causes the adaptive model to suppress wet-event detection: hit rate (POD) drops from 89.2% to 75.2% (missing 475 wet events vs 206 for equal blend), and at +24h lead adaptive RMSE is 0.257 vs 0.237 for equal blend (-8.3% worse).
+
+Any UI element or endpoint that claims adaptive weighting for wind or rain would violate scientific integrity; VARUNA strictly serves equal consensus for them.
 
 ## 3. Verification is against ERA5, not observations
 

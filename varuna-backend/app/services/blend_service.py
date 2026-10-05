@@ -11,17 +11,20 @@ from ..config import (
     APP_VERSION,
     ATTRIBUTION,
     BLEND_TEST_CSV,
+    BLEND_TEST_CSVS,
     FORECAST_HORIZON_CAP_H,
     HORIZON_NOTE,
     LEAD_TIMES,
     OPERATIONAL_LEAD_HOURS,
     META_MODEL_PATH,
+    META_MODEL_PATHS,
     MODEL_KEYS,
     PROVENANCE_JSON,
     REGIONS,
     REPLAY_TIMELINES,
     REPORTS_DIR,
     VARIABLES,
+    is_variable_validated,
 )
 from ..providers.open_meteo import ProviderError, get_live_forecast, probe_provider, FORECAST_API, PREVIOUS_RUNS_API, ARCHIVE_API
 from ..science.meta_model import (
@@ -49,19 +52,19 @@ class ServiceUnavailable(RuntimeError):
         self.provider_reason = provider_reason
 
 
-_bundle_cache: dict | None = None
+_bundle_cache: dict[str, dict | None] = {}
 
 
-def _bundle() -> dict | None:
+def _bundle(variable: str = "temperature") -> dict | None:
     global _bundle_cache
-    if _bundle_cache is None:
-        _bundle_cache = load_bundle(META_MODEL_PATH)
-    return _bundle_cache
+    if variable not in _bundle_cache:
+        _bundle_cache[variable] = load_bundle(variable=variable)
+    return _bundle_cache[variable]
 
 
 def reset_bundle_cache() -> None:
     global _bundle_cache
-    _bundle_cache = None
+    _bundle_cache.clear()
 
 
 def _now_hour() -> datetime:
@@ -102,7 +105,9 @@ def _weights_for(
     available = {k: v for k, v in member_values.items() if v is not None}
     if not available:
         return {}, "none", None, "no_model_values_available"
-    if bundle is not None and variable == "temperature" and bundle.get("variable") == "temperature":
+
+    # Only promote to adaptive XGBoost if variable is validated AND bundle matches variable
+    if is_variable_validated(variable) and bundle is not None and bundle.get("variable") == variable:
         own = member_values
         preds: dict[str, float] = {}
         for key in available:
@@ -110,12 +115,23 @@ def _weights_for(
             f["model_own_forecast"] = float(available[key])
             preds[key] = predict_errors_single_row(bundle, f)[key]
         weights = weights_from_predicted_errors(preds)
-        return weights, "adaptive_xgboost", preds, None
+        reason = bundle.get("validation", {}).get("reason") or "Adaptive XGBoost weighting enabled after held-out validation."
+        return weights, "adaptive_xgboost", preds, reason
+
+    # Otherwise equal weights
     weights = weights_from_predicted_errors({k: 1.0 for k in available})
-    return weights, "equal_fallback_untrained", None, (
-        "No meta-model trained for this variable yet; equal weights are used "
-        "and skill is unvalidated."
-    )
+    if bundle is not None:
+        val_meta = bundle.get("validation", {})
+        reason = val_meta.get("reason") or (
+            "Adaptive model trained but not promoted because held-out performance "
+            "did not beat the best single NWP member / baseline."
+        )
+    else:
+        reason = (
+            "No meta-model trained for this variable yet; equal weights are used "
+            "and skill is unvalidated."
+        )
+    return weights, "equal_fallback_untrained", None, reason
 
 
 def _load_replay() -> dict:
@@ -276,7 +292,7 @@ def process_series_forecast(
     now = _now_hour()
     times = series["time"]
     elevation = series.get("elevation_m")
-    bundle = _bundle()
+    bundle = _bundle(variable)
 
     rows: list[dict] = []
     last_regime = {"index": None, "name": None}
@@ -341,8 +357,9 @@ def process_series_forecast(
 
     preds_rows: list[dict[str, float]] | None = None
     use_adaptive = (
-        bundle is not None and variable == "temperature"
-        and bundle.get("variable") == "temperature"
+        is_variable_validated(variable)
+        and bundle is not None
+        and bundle.get("variable") == variable
     )
     if use_adaptive:
         preds_rows = predict_errors_rows(bundle, shared_rows, own)
@@ -367,15 +384,22 @@ def process_series_forecast(
         elif preds_rows is not None:
             preds = {k: v for k, v in preds_rows[i].items() if k in available}
             weights = weights_from_predicted_errors(preds)
-            scheme, reason = "adaptive_xgboost", None
+            scheme = "adaptive_xgboost"
+            reason = bundle.get("validation", {}).get("reason") or "Adaptive XGBoost weighting enabled after held-out validation."
         else:
             weights = weights_from_predicted_errors({k: 1.0 for k in available})
             scheme = "equal_fallback_untrained"
             preds = None
-            reason = (
-                "No meta-model trained for this variable yet; equal weights are "
-                "used and skill is unvalidated."
-            )
+            if bundle is not None:
+                reason = bundle.get("validation", {}).get("reason") or (
+                    "Adaptive model trained but not promoted because held-out performance "
+                    "did not beat the best single NWP member / baseline."
+                )
+            else:
+                reason = (
+                    "No meta-model trained for this variable yet; equal weights are "
+                    "used and skill is unvalidated."
+                )
         schemes.add(scheme)
         if reason:
             reasons.add(reason)
@@ -402,7 +426,7 @@ def process_series_forecast(
         "unit": VARIABLES[variable]["unit"],
         "data_mode": data_mode,
         "validated": (
-            VARIABLES[variable]["validated"]
+            is_variable_validated(variable)
             and "adaptive_xgboost" in schemes
             and region.get("validated", False)
         ),
@@ -482,7 +506,7 @@ def _replay_timeline_entries(region_id: str, variable: str, lead: int,
             provider_http_status=provider_http_status,
             provider_reason=provider_reason,
         )
-    bundle = _bundle()
+    bundle = _bundle(variable)
     entries = []
     worst = 4
     any_degraded = False
@@ -511,10 +535,15 @@ def _replay_timeline_entries(region_id: str, variable: str, lead: int,
         "unit": VARIABLES[variable]["unit"],
         "data_mode": data_mode,
         "validated": (
-            VARIABLES[variable]["validated"]
+            is_variable_validated(variable)
             and region.get("validated", False)
         ),
-        "weighting_scheme": "adaptive_xgboost" if bundle else "unknown",
+        "weighting_scheme": "adaptive_xgboost" if (is_variable_validated(variable) and bundle) else "equal_fallback_untrained",
+        "weighting_reason": (
+            "Adaptive XGBoost weighting enabled after held-out validation."
+            if (is_variable_validated(variable) and bundle)
+            else "Replay timeline uses equal-weight consensus."
+        ),
         "regime": {"index": regime_index, "name": regime_name},
         "models_used": worst,
         "degraded": any_degraded,
@@ -571,7 +600,7 @@ def weights_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
     if variable not in VARIABLES:
         raise ServiceUnavailable(f"Unknown variable '{variable}'.")
     region = REGIONS[region_id]
-    bundle = _bundle()
+    bundle = _bundle(variable)
 
     target = _now_hour()
     member_values: dict[str, float | None] = {}
@@ -627,7 +656,7 @@ def weights_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
             return None
         ens_mean, ens_spread = ensemble_stats(member_values)
         feats = _features(region, ts, lead_time_hours, regime_index, ens_mean, ens_spread,
-                          member_values.get(variable) or ens_mean, elevation)
+                          ens_mean, elevation)
         weights, scheme, preds, reason = _weights_for(feats, variable, member_values, bundle)
         return {
             "region_id": region_id,
@@ -636,7 +665,8 @@ def weights_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
             "lead_time_hours": lead_time_hours,
             "data_mode": data_mode,
             "validated": (
-                VARIABLES[variable]["validated"]
+                is_variable_validated(variable)
+                and scheme == "adaptive_xgboost"
                 and region.get("validated", False)
             ),
             "regime": {"index": regime_index, "name": regime_name},
@@ -659,7 +689,7 @@ def weights_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
     )
     ens_mean, ens_spread = ensemble_stats(member_values)
     feats = _features(region, ts, lead_time_hours, regime_index, ens_mean, ens_spread,
-                      member_values.get(variable) or ens_mean, elevation)
+                      ens_mean, elevation)
     weights, scheme, preds, reason = _weights_for(feats, variable, member_values, bundle)
     del target
     return {
@@ -669,7 +699,7 @@ def weights_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
         "lead_time_hours": lead_time_hours,
         "data_mode": data_mode,
         "validated": (
-            VARIABLES[variable]["validated"]
+            is_variable_validated(variable)
             and scheme == "adaptive_xgboost"
             and region.get("validated", False)
         ),
@@ -757,7 +787,7 @@ def extremes_payload(region_id: str, lead_time_hours: int, simulate: bool = Fals
         "checks": checks,
         "window_hours": min(24, idx + 1),
         "evaluated_blend_time": temps["timeline"][idx]["time"],
-        "validated": {"temperature": True, "rainfall": False, "wind_speed": False},
+        "validated": {var: is_variable_validated(var) for var in ["temperature", "rainfall", "wind_speed", "pressure"]},
         "simulated": bool(simulate),
         "simulate_note": (
             "simulate=true: values are illustrative recombinations, not a "
@@ -767,8 +797,8 @@ def extremes_payload(region_id: str, lead_time_hours: int, simulate: bool = Fals
             "Thresholds: rainfall 64.5 mm heavy / 115.6 mm very heavy (24 h "
             "accumulation), heatwave 45.0 C, wind squall 55 km/h / gale 62 "
             "km/h. Alerts fire only when the blended forecast crosses a "
-            "threshold. Rainfall and wind skill are unvalidated (temperature "
-            "only is benchmarked)."
+            "threshold. Temperature and surface pressure are benchmarked and validated; "
+            "rainfall and wind speed operate on equal-weight NWP consensus."
         ),
         "attribution": ATTRIBUTION,
     }
@@ -776,13 +806,26 @@ def extremes_payload(region_id: str, lead_time_hours: int, simulate: bool = Fals
 
 def explain_payload(region_id: str, variable: str, lead_time_hours: int) -> dict:
     w = weights_payload(region_id, variable, lead_time_hours)
-    bundle = _bundle()
+    bundle = _bundle(variable)
+    validated = is_variable_validated(variable)
+    if not validated:
+        reason = (
+            bundle.get("validation", {}).get("reason")
+            if bundle and bundle.get("validation", {}).get("reason")
+            else f"Adaptive meta-model unavailable or unvalidated for {variable}; operational forecast uses equal-weight NWP consensus."
+        )
+        return {
+            **w,
+            "feature_importances": [],
+            "model_available": bundle is not None,
+            "model_note": reason,
+        }
     if bundle is None:
         return {
             **w,
             "feature_importances": [],
             "model_available": False,
-            "model_note": "Meta-model not trained yet. Run scripts/run_pipeline.py.",
+            "model_note": f"Meta-model for {variable} not trained yet. Run scripts/run_pipeline.py.",
         }
     imps = feature_importances(bundle)
     return {
@@ -803,32 +846,52 @@ def explain_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
     }
 
 
-def skill_payload() -> dict:
-    if not BLEND_TEST_CSV.exists():
+def skill_payload(variable: str = "temperature") -> dict:
+    if variable not in VARIABLES:
         return {
             "available": False,
-            "reason": "pipeline_not_run",
-            "message": (
-                "No held-out results found. Run: python scripts/run_pipeline.py"
-            ),
+            "variable": variable,
+            "reason": "unknown_variable",
+            "message": f"Unknown variable '{variable}'. Supported: {', '.join(VARIABLES.keys())}",
         }
-    headline = pd.read_csv(BLEND_TEST_CSV)
+
+    csv_path = BLEND_TEST_CSVS.get(variable)
+    if csv_path is None or not csv_path.exists():
+        if variable == "temperature" and BLEND_TEST_CSV.exists():
+            csv_path = BLEND_TEST_CSV
+        else:
+            return {
+                "available": False,
+                "variable": variable,
+                "reason": "pipeline_not_run",
+                "message": f"Validation not available for {variable}. Run: python scripts/run_pipeline.py --variables {variable}",
+            }
+
+    headline = pd.read_csv(csv_path)
+
     def _read(name: str) -> list[dict]:
-        p = REPORTS_DIR / name
-        if not p.exists():
-            return []
-        df = pd.read_csv(p)
-        return json.loads(df.to_json(orient="records"))
+        p_var = REPORTS_DIR / f"{name}_{variable}.csv"
+        if p_var.exists():
+            df = pd.read_csv(p_var)
+            return json.loads(df.to_json(orient="records"))
+        if variable == "temperature":
+            p_gen = REPORTS_DIR / f"{name}.csv"
+            if p_gen.exists():
+                df = pd.read_csv(p_gen)
+                return json.loads(df.to_json(orient="records"))
+        return []
 
     return {
         "available": True,
+        "variable": variable,
+        "unit": VARIABLES[variable]["unit"],
         "headline": {
             "scope": "held_out_test",
             "rows": json.loads(headline.to_json(orient="records")),
         },
-        "by_lead": {"scope": "full_dataset_all_splits", "rows": _read("skill_by_lead.csv")},
-        "by_season": {"scope": "full_dataset_all_splits", "rows": _read("skill_by_season.csv")},
-        "by_region": {"scope": "full_dataset_all_splits", "rows": _read("skill_by_region.csv")},
+        "by_lead": {"scope": "full_dataset_all_splits", "rows": _read("skill_by_lead")},
+        "by_season": {"scope": "full_dataset_all_splits", "rows": _read("skill_by_season")},
+        "by_region": {"scope": "full_dataset_all_splits", "rows": _read("skill_by_region")},
         "reference": "ERA5 reanalysis (not station observations, not ground truth)",
         "caveat": (
             "Held-out test covers only the chronologically last season "
@@ -859,6 +922,8 @@ def providers_status_payload() -> dict:
         "replay_timelines_json": REPLAY_TIMELINES.exists(),
         "feature_importance_png": (REPORTS_DIR / "feature_importance.png").exists(),
         "adaptive_weights_csv": (REPORTS_DIR / "adaptive_weights.csv").exists(),
+        "validation_summary_csv": (REPORTS_DIR / "variable_validation_summary.csv").exists(),
+        "meta_models": {v: p.exists() for v, p in META_MODEL_PATHS.items()},
     }
     return {
         "providers": probes,
@@ -890,7 +955,7 @@ def health_payload() -> dict:
         "status": "ok",
         "version": APP_VERSION,
         "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "model_bundle_loaded": _bundle() is not None,
+        "model_bundle_loaded": _bundle("temperature") is not None,
     }
 
 
@@ -927,7 +992,7 @@ def analyze_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
     var_label = var_labels.get(variable, variable.replace("_", " ").title())
 
     scheme = fc.get("weighting_scheme", "equal_fallback_untrained")
-    is_adaptive = (variable == "temperature" and scheme == "adaptive_xgboost" and predicted_errors is not None)
+    is_adaptive = (is_variable_validated(variable) and scheme == "adaptive_xgboost" and predicted_errors is not None)
 
     if is_adaptive and weights:
         best_key = max(weights, key=lambda k: weights.get(k, 0))

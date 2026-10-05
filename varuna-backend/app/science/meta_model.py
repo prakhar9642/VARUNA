@@ -12,6 +12,7 @@ from xgboost import XGBRegressor
 from ..config import (
     FEATURE_NAMES,
     META_MODEL_PATH,
+    META_MODEL_PATHS,
     MODEL_KEYS,
     WEIGHT_EPSILON,
     XGB_PARAMS,
@@ -126,14 +127,33 @@ def predict_errors_rows(
     return out
 
 
-def save_bundle(bundle: dict[str, Any], path: Path = META_MODEL_PATH) -> Path:
+def save_bundle(
+    bundle: dict[str, Any],
+    path: Path | str | None = None,
+    variable: str | None = None,
+) -> Path:
+    if path is None:
+        var = variable or bundle.get("variable", "temperature")
+        path = META_MODEL_PATHS.get(var, META_MODEL_PATH)
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(bundle, path)
     return path
 
 
-def load_bundle(path: Path = META_MODEL_PATH) -> dict[str, Any] | None:
-    if not Path(path).exists():
+def load_bundle(
+    path: Path | str | None = None,
+    variable: str | None = None,
+) -> dict[str, Any] | None:
+    if path is None:
+        if variable is not None:
+            path = META_MODEL_PATHS.get(variable)
+            if path is None:
+                return None
+        else:
+            path = META_MODEL_PATH
+    path = Path(path)
+    if not path.exists():
         return None
     return joblib.load(path)
 

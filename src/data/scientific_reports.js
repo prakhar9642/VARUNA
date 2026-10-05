@@ -69,24 +69,37 @@ export function getHeldOutTestMetrics(sourceRows) {
   const equalRow = mapped.find((m) => m.modelKey === 'equal_blend');
   const invRow = mapped.find((m) => m.modelKey === 'static_inverse_rmse_blend' || m.modelKey === 'inv_rmse_blend');
 
+  const singleNwpKeys = ['ecmwf_ifs', 'ecmwf_aifs', 'ncep_gfs', 'dwd_icon'];
+  const singleNwpRows = mapped.filter((m) => singleNwpKeys.includes(m.modelKey));
+  const bestSingleNwp = singleNwpRows.length > 0
+    ? singleNwpRows.reduce((best, curr) => (curr.rmse < best.rmse ? curr : best), singleNwpRows[0])
+    : ifsRow;
+
+  const reductionVsBestNwp =
+    bestSingleNwp && varunaRow
+      ? Number((((bestSingleNwp.rmse - varunaRow.rmse) / bestSingleNwp.rmse) * 100).toFixed(1))
+      : (sourceRows ? 0.0 : 34.7);
+
   const reductionVsIfs =
     ifsRow && varunaRow
       ? Number((((ifsRow.rmse - varunaRow.rmse) / ifsRow.rmse) * 100).toFixed(1))
-      : 34.7;
+      : (sourceRows ? 0.0 : 34.7);
 
   const reductionVsEqual =
     equalRow && varunaRow
       ? Number((((equalRow.rmse - varunaRow.rmse) / equalRow.rmse) * 100).toFixed(1))
-      : 18.7;
+      : (sourceRows ? 0.0 : 18.7);
 
   const reductionVsInv =
     invRow && varunaRow
       ? Number((((invRow.rmse - varunaRow.rmse) / invRow.rmse) * 100).toFixed(1))
-      : 0.9;
+      : (sourceRows ? 0.0 : 0.9);
 
   return {
     records: mapped,
-    bestNwpRmse: ifsRow?.rmse ?? 1.195,
+    bestNwpKey: bestSingleNwp?.modelKey ?? 'ecmwf_ifs',
+    bestNwpName: bestSingleNwp?.modelName ?? 'ECMWF IFS',
+    bestNwpRmse: bestSingleNwp?.rmse ?? 1.195,
     blendRmse: varunaRow?.rmse ?? 0.7803,
     blendMae: varunaRow?.mae ?? 0.612,
     blendBias: varunaRow?.bias ?? 0.066,
@@ -95,6 +108,7 @@ export function getHeldOutTestMetrics(sourceRows) {
     reductionVsIfs,
     reductionVsEqual,
     reductionVsInv,
+    reductionVsBestNwp,
   };
 }
 

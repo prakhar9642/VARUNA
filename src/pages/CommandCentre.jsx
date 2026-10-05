@@ -121,7 +121,7 @@ export default function CommandCentre() {
       : `${modelAverages[0].name} (${modelAverages[0].val}%)`;
 
     const sampleForecast = validRegions[0]?.forecast;
-    const isAdaptiveVar = sampleForecast?.variable?.id === 'temperature';
+    const isAdaptiveVar = sampleForecast?.weightingScheme === 'adaptive_xgboost';
     const avgReduction = isAdaptiveVar && skillMetric
       ? `-${skillMetric.reductionPct}%`
       : 'Equal Weight';
@@ -317,10 +317,10 @@ export default function CommandCentre() {
                   {f ? (
                     <div className="text-scale-xs text-[var(--varuna-text-secondary)] flex items-center justify-between">
                       <span className="truncate max-w-[210px] text-[11px] font-medium text-[var(--varuna-blue-dark)] dark:text-[var(--varuna-blue)]">
-                        ⚡ AIFS ({f.models?.aifs?.weight ?? 0}%) · GFS ({f.models?.gfs?.weight ?? 0}%) · IFS ({f.models?.ifs?.weight ?? 0}%)
+                        ⚡ AIFS ({f.models?.aifs?.weight ?? 25}%) · IFS ({f.models?.ifs?.weight ?? 25}%) · GFS ({f.models?.gfs?.weight ?? 25}%) · ICON ({f.models?.icon?.weight ?? 25}%)
                       </span>
                       <span className="font-data font-semibold text-[10px] text-[var(--varuna-text-muted)] shrink-0">
-                        {skillMetric?.rmse ? `RMSE ${skillMetric.rmse}` : 'Equal Blend'}
+                        {f.weightingScheme === 'adaptive_xgboost' ? (skillMetric?.rmse ? `RMSE ${skillMetric.rmse}` : 'Adaptive Blend') : 'Equal Blend'}
                       </span>
                     </div>
                   ) : (

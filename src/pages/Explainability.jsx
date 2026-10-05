@@ -84,7 +84,7 @@ export default function Explainability() {
   const selectedRegion = REGIONS.find((r) => r.id === selectedRegionId) || REGIONS[0];
   const selectedVarObj = VARIABLES.find((v) => v.id === selectedVariable) || VARIABLES[0];
 
-  const isAdaptive = activeForecast ? (activeForecast.weightingScheme === 'adaptive_xgboost' || (selectedVariable === 'temperature' && !activeForecast.weightingScheme)) : false;
+  const isAdaptive = activeForecast ? (activeForecast.weightingScheme === 'adaptive_xgboost' || ((selectedVariable === 'temperature' || selectedVariable === 'pressure') && !activeForecast.weightingScheme)) : false;
   const region = activeForecast?.region || selectedRegion;
   const models = activeForecast?.models || {};
   const whyThisBlend = activeForecast?.whyThisBlend || {};
@@ -302,7 +302,7 @@ export default function Explainability() {
                 : '—'}
             </div>
             <div className="text-[10px] text-[var(--varuna-text-secondary)] mt-1">
-              {isUnavailable ? 'Stream Unavailable' : (isAdaptive ? 'Held-Out RMSE: 0.78 °C' : 'Equal-Weight Blend')}
+              {isUnavailable ? 'Stream Unavailable' : (isAdaptive ? (selectedVariable === 'temperature' ? 'Held-Out RMSE: 0.78 °C' : selectedVariable === 'pressure' ? 'Held-Out RMSE: 0.67 hPa' : 'Held-Out Validated') : 'Equal-Weight Blend')}
             </div>
           </div>
         </div>
@@ -546,7 +546,7 @@ export default function Explainability() {
             </div>
             <ul className="text-scale-xs text-[var(--varuna-text-secondary)] space-y-1.5 list-disc pl-4 leading-relaxed font-sans">
               <li>Synthesizes four distinct NWP streams (ECMWF IFS, ECMWF AIFS, NOAA GFS, DWD ICON) without treating VARUNA as a fifth model.</li>
-              <li>2m Temperature uses a rigorously validated XGBoost meta-model achieving 0.78 °C RMSE on held-out post-monsoon test sets ($N=4,512$).</li>
+              <li>2m Temperature and Surface Pressure use rigorously validated XGBoost meta-models achieving 0.78 °C and 0.67 hPa RMSE on held-out post-monsoon test sets ($N=4,512$).</li>
               <li>Hamilton-Hare apportionment guarantees weights strictly sum to 100% with no negative weights or artificial offsets.</li>
             </ul>
           </div>
@@ -558,7 +558,7 @@ export default function Explainability() {
             </div>
             <ul className="text-scale-xs text-[var(--varuna-text-secondary)] space-y-1.5 list-disc pl-4 leading-relaxed font-sans">
               <li>VARUNA does not claim to replace IMD synoptic warnings or official meteorological cyclone advisories.</li>
-              <li>Precipitation, wind speed, and surface pressure currently operate on equal-weight consensus (25% each) and are truthfully marked as unvalidated by ML.</li>
+              <li>Precipitation and wind speed currently operate on equal-weight consensus (25% each) and are truthfully marked as unvalidated by ML because held-out gate criteria were not met.</li>
               <li>We never display simulated, hardcoded, or demo SHAP values if real model weights are unavailable.</li>
             </ul>
           </div>

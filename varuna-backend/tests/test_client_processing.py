@@ -156,7 +156,7 @@ def test_process_matrix_leads(region: str, variable: str, lead: int):
         assert target["models"][m] is not None
 
     # Check scientific weighting scheme
-    if variable == "temperature":
+    if variable in ("temperature", "pressure"):
         assert body["weighting_scheme"] in ("adaptive_xgboost", "equal_fallback_untrained")
         if body["weighting_scheme"] == "adaptive_xgboost":
             assert target["predicted_errors"] is not None

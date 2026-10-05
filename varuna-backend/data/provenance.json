@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-29T17:18:10Z",
+  "generated_at": "2026-10-05T03:17:53Z",
   "attribution": "Data: Open-Meteo (CC BY 4.0), ECMWF, NOAA, DWD. Verification reference: ERA5 reanalysis, not station observations.",
   "reference_dataset": "ERA5 reanalysis (Open-Meteo archive API) - reference, not ground truth",
   "providers": {
@@ -39,8 +39,11 @@
     "rajasthan_thar",
     "western_ghats"
   ],
-  "variables": [
-    "temperature"
+  "variables_evaluated": [
+    "temperature",
+    "rainfall",
+    "wind_speed",
+    "pressure"
   ],
   "leads_hours": [
     24,
@@ -58,68 +61,431 @@
   },
   "failed_fetches": [],
   "test_season_caveat": "The held-out test partition is entirely the chronologically last season (Post-Monsoon Sep 1-8, 2026). Headline numbers therefore describe one season only and must not be read as verified across all seasons.",
-  "rows_total": 21042,
+  "per_variable": {
+    "temperature": {
+      "rows_total": 21042,
+      "split_rows": {
+        "train": 13170,
+        "validation": 3360,
+        "test": 4512
+      },
+      "split_timestamps": {
+        "train": 608,
+        "validation": 140,
+        "test": 188
+      },
+      "train_rmse_per_model": {
+        "ecmwf_ifs": 1.7352,
+        "ecmwf_aifs": 1.6554,
+        "ncep_gfs": 3.2404,
+        "dwd_icon": 2.2318
+      },
+      "static_inverse_rmse_weights_train_only": {
+        "ecmwf_ifs": 33,
+        "ecmwf_aifs": 37,
+        "ncep_gfs": 10,
+        "dwd_icon": 20
+      },
+      "model_artifact": "xgboost_meta_temperature.joblib",
+      "validation_passed": true,
+      "validation_reason": "Adaptive XGBoost weighting enabled after held-out validation (+29.4% vs ecmwf_aifs).",
+      "held_out_test_metrics": {
+        "ecmwf_ifs": {
+          "n": 4512,
+          "rmse": 1.195,
+          "mae": 0.924,
+          "bias": -0.561,
+          "pearson_r": 0.973
+        },
+        "ecmwf_aifs": {
+          "n": 4512,
+          "rmse": 1.105,
+          "mae": 0.866,
+          "bias": 0.51,
+          "pearson_r": 0.981
+        },
+        "ncep_gfs": {
+          "n": 4512,
+          "rmse": 2.32,
+          "mae": 1.874,
+          "bias": 0.674,
+          "pearson_r": 0.93
+        },
+        "dwd_icon": {
+          "n": 4512,
+          "rmse": 1.131,
+          "mae": 0.876,
+          "bias": 0.056,
+          "pearson_r": 0.969
+        },
+        "equal_blend": {
+          "n": 4512,
+          "rmse": 0.96,
+          "mae": 0.759,
+          "bias": 0.17,
+          "pearson_r": 0.978
+        },
+        "static_inverse_rmse_blend": {
+          "n": 4512,
+          "rmse": 0.787,
+          "mae": 0.622,
+          "bias": 0.082,
+          "pearson_r": 0.984
+        },
+        "varuna_adaptive": {
+          "n": 4512,
+          "rmse": 0.78,
+          "mae": 0.612,
+          "bias": 0.066,
+          "pearson_r": 0.984
+        }
+      },
+      "rainfall_diagnostics": null,
+      "wind_diagnostics": null
+    },
+    "rainfall": {
+      "rows_total": 21474,
+      "split_rows": {
+        "train": 13602,
+        "validation": 3360,
+        "test": 4512
+      },
+      "split_timestamps": {
+        "train": 608,
+        "validation": 140,
+        "test": 188
+      },
+      "train_rmse_per_model": {
+        "ecmwf_ifs": 1.9718,
+        "ecmwf_aifs": 1.8588,
+        "ncep_gfs": 2.4491,
+        "dwd_icon": 2.3045
+      },
+      "static_inverse_rmse_weights_train_only": {
+        "ecmwf_ifs": 29,
+        "ecmwf_aifs": 32,
+        "ncep_gfs": 18,
+        "dwd_icon": 21
+      },
+      "model_artifact": "xgboost_meta_rainfall.joblib",
+      "validation_passed": false,
+      "validation_reason": "Adaptive model trained but not promoted: zero-inflated skew suppresses precipitation detection (wet-event POD drops from 89.2% to 75.2%, missing 475 wet events) and underperforms equal blend at +24h lead.",
+      "held_out_test_metrics": {
+        "ecmwf_ifs": {
+          "n": 4512,
+          "rmse": 0.425,
+          "mae": 0.172,
+          "bias": 0.102,
+          "pearson_r": 0.389
+        },
+        "ecmwf_aifs": {
+          "n": 4512,
+          "rmse": 0.447,
+          "mae": 0.19,
+          "bias": 0.133,
+          "pearson_r": 0.332
+        },
+        "ncep_gfs": {
+          "n": 4512,
+          "rmse": 0.323,
+          "mae": 0.126,
+          "bias": -0.025,
+          "pearson_r": 0.231
+        },
+        "dwd_icon": {
+          "n": 4512,
+          "rmse": 0.333,
+          "mae": 0.131,
+          "bias": -0.019,
+          "pearson_r": 0.294
+        },
+        "equal_blend": {
+          "n": 4512,
+          "rmse": 0.282,
+          "mae": 0.128,
+          "bias": 0.048,
+          "pearson_r": 0.45
+        },
+        "static_inverse_rmse_blend": {
+          "n": 4512,
+          "rmse": 0.297,
+          "mae": 0.137,
+          "bias": 0.064,
+          "pearson_r": 0.446
+        },
+        "varuna_adaptive": {
+          "n": 4512,
+          "rmse": 0.268,
+          "mae": 0.104,
+          "bias": -0.006,
+          "pearson_r": 0.427
+        }
+      },
+      "rainfall_diagnostics": {
+        "n_total": 4512,
+        "n_dry": 2596,
+        "dry_fraction": 0.5754,
+        "n_wet": 1916,
+        "wet_fraction": 0.4246,
+        "threshold_mm_h": 0.1,
+        "contingency": {
+          "ecmwf_ifs": {
+            "hits": 1765,
+            "misses": 151,
+            "false_alarms": 632,
+            "pod": 0.921,
+            "far": 0.264,
+            "csi": 0.693
+          },
+          "ecmwf_aifs": {
+            "hits": 1858,
+            "misses": 58,
+            "false_alarms": 1055,
+            "pod": 0.97,
+            "far": 0.362,
+            "csi": 0.625
+          },
+          "ncep_gfs": {
+            "hits": 1142,
+            "misses": 774,
+            "false_alarms": 174,
+            "pod": 0.596,
+            "far": 0.132,
+            "csi": 0.546
+          },
+          "dwd_icon": {
+            "hits": 1095,
+            "misses": 821,
+            "false_alarms": 202,
+            "pod": 0.572,
+            "far": 0.156,
+            "csi": 0.517
+          },
+          "equal_blend": {
+            "hits": 1710,
+            "misses": 206,
+            "false_alarms": 509,
+            "pod": 0.892,
+            "far": 0.229,
+            "csi": 0.705
+          },
+          "varuna_adaptive": {
+            "hits": 1441,
+            "misses": 475,
+            "false_alarms": 244,
+            "pod": 0.752,
+            "far": 0.145,
+            "csi": 0.667
+          }
+        }
+      },
+      "wind_diagnostics": null
+    },
+    "wind_speed": {
+      "rows_total": 22464,
+      "split_rows": {
+        "train": 14592,
+        "validation": 3360,
+        "test": 4512
+      },
+      "split_timestamps": {
+        "train": 608,
+        "validation": 140,
+        "test": 188
+      },
+      "train_rmse_per_model": {
+        "ecmwf_ifs": 4.4243,
+        "ecmwf_aifs": 3.3761,
+        "ncep_gfs": 6.3752,
+        "dwd_icon": 5.8148
+      },
+      "static_inverse_rmse_weights_train_only": {
+        "ecmwf_ifs": 27,
+        "ecmwf_aifs": 45,
+        "ncep_gfs": 13,
+        "dwd_icon": 15
+      },
+      "model_artifact": "xgboost_meta_wind_speed.joblib",
+      "validation_passed": false,
+      "validation_reason": "Adaptive model trained but not promoted: adaptive blend RMSE (2.224 km/h) underperforms equal-weight consensus (2.137 km/h) across leads and degrades on high winds.",
+      "held_out_test_metrics": {
+        "ecmwf_ifs": {
+          "n": 4512,
+          "rmse": 3.441,
+          "mae": 2.766,
+          "bias": -0.556,
+          "pearson_r": 0.625
+        },
+        "ecmwf_aifs": {
+          "n": 4512,
+          "rmse": 2.427,
+          "mae": 1.9,
+          "bias": -0.328,
+          "pearson_r": 0.799
+        },
+        "ncep_gfs": {
+          "n": 4512,
+          "rmse": 6.098,
+          "mae": 4.953,
+          "bias": 3.881,
+          "pearson_r": 0.648
+        },
+        "dwd_icon": {
+          "n": 4512,
+          "rmse": 4.031,
+          "mae": 3.329,
+          "bias": -2.077,
+          "pearson_r": 0.569
+        },
+        "equal_blend": {
+          "n": 4512,
+          "rmse": 2.137,
+          "mae": 1.655,
+          "bias": 0.23,
+          "pearson_r": 0.846
+        },
+        "static_inverse_rmse_blend": {
+          "n": 4512,
+          "rmse": 2.171,
+          "mae": 1.707,
+          "bias": -0.105,
+          "pearson_r": 0.84
+        },
+        "varuna_adaptive": {
+          "n": 4512,
+          "rmse": 2.224,
+          "mae": 1.741,
+          "bias": -0.043,
+          "pearson_r": 0.831
+        }
+      },
+      "rainfall_diagnostics": null,
+      "wind_diagnostics": {
+        "p75_kmh": 13.6,
+        "p90_kmh": 15.9,
+        "high_winds_n": 452,
+        "equal_blend_high_rmse": 2.487,
+        "equal_blend_high_mae": 2.1124,
+        "equal_blend_high_bias": -2.0033,
+        "adaptive_high_rmse": 3.0927,
+        "adaptive_high_mae": 2.7866,
+        "adaptive_high_bias": -2.6461,
+        "adaptive_degrades_high_winds": true
+      }
+    },
+    "pressure": {
+      "rows_total": 21024,
+      "split_rows": {
+        "train": 13152,
+        "validation": 3360,
+        "test": 4512
+      },
+      "split_timestamps": {
+        "train": 608,
+        "validation": 140,
+        "test": 188
+      },
+      "train_rmse_per_model": {
+        "ecmwf_ifs": 0.9588,
+        "ecmwf_aifs": 0.9324,
+        "ncep_gfs": 1.8492,
+        "dwd_icon": 0.9107
+      },
+      "static_inverse_rmse_weights_train_only": {
+        "ecmwf_ifs": 29,
+        "ecmwf_aifs": 31,
+        "ncep_gfs": 8,
+        "dwd_icon": 32
+      },
+      "model_artifact": "xgboost_meta_pressure.joblib",
+      "validation_passed": true,
+      "validation_reason": "Adaptive XGBoost weighting enabled after held-out validation (+9.9% vs dwd_icon, +19.6% vs equal blend).",
+      "held_out_test_metrics": {
+        "ecmwf_ifs": {
+          "n": 4512,
+          "rmse": 0.932,
+          "mae": 0.751,
+          "bias": -0.692,
+          "pearson_r": 1.0
+        },
+        "ecmwf_aifs": {
+          "n": 4512,
+          "rmse": 0.809,
+          "mae": 0.637,
+          "bias": -0.257,
+          "pearson_r": 1.0
+        },
+        "ncep_gfs": {
+          "n": 4512,
+          "rmse": 1.763,
+          "mae": 1.459,
+          "bias": -1.399,
+          "pearson_r": 1.0
+        },
+        "dwd_icon": {
+          "n": 4512,
+          "rmse": 0.748,
+          "mae": 0.602,
+          "bias": -0.483,
+          "pearson_r": 1.0
+        },
+        "equal_blend": {
+          "n": 4512,
+          "rmse": 0.838,
+          "mae": 0.727,
+          "bias": -0.708,
+          "pearson_r": 1.0
+        },
+        "static_inverse_rmse_blend": {
+          "n": 4512,
+          "rmse": 0.716,
+          "mae": 0.592,
+          "bias": -0.547,
+          "pearson_r": 1.0
+        },
+        "varuna_adaptive": {
+          "n": 4512,
+          "rmse": 0.674,
+          "mae": 0.54,
+          "bias": -0.45,
+          "pearson_r": 1.0
+        }
+      },
+      "rainfall_diagnostics": null,
+      "wind_diagnostics": null
+    }
+  },
+  "rows_total": 86004,
   "timestamps_total": 936,
   "timestamp_range": [
     "2026-01-10T00:00",
     "2026-09-08T23:00"
   ],
   "rows_per_season": {
-    "monsoon": 8640,
-    "winter": 4608,
-    "post_monsoon": 4608,
-    "pre_monsoon": 3186
+    "monsoon": 34560,
+    "winter": 18432,
+    "post_monsoon": 18432,
+    "pre_monsoon": 14580
   },
   "rows_per_region": {
-    "bengaluru_deccan": 3507,
-    "delhi_ncr": 3507,
-    "mumbai_coastal": 3507,
-    "odisha_coast": 3507,
-    "rajasthan_thar": 3507,
-    "western_ghats": 3507
+    "bengaluru_deccan": 14334,
+    "delhi_ncr": 14334,
+    "mumbai_coastal": 14334,
+    "odisha_coast": 14334,
+    "rajasthan_thar": 14334,
+    "western_ghats": 14334
   },
   "rows_per_lead": {
-    "24": 5154,
-    "48": 5616,
-    "72": 5154,
-    "120": 5118
+    "24": 21078,
+    "48": 22002,
+    "72": 21540,
+    "120": 21384
   },
-  "split_rows": {
-    "train": 13170,
-    "validation": 3360,
-    "test": 4512
-  },
-  "split_timestamps": {
-    "train": 608,
-    "validation": 140,
-    "test": 188
-  },
-  "split_timestamp_range": {
-    "train": [
-      "2026-01-10T00:00",
-      "2026-07-10T07:00"
-    ],
-    "validation": [
-      "2026-07-10T08:00",
-      "2026-09-01T03:00"
-    ],
-    "test": [
-      "2026-09-01T04:00",
-      "2026-09-08T23:00"
-    ]
-  },
-  "trained_variable": "temperature",
-  "static_inverse_rmse_weights_train_only": {
-    "ecmwf_ifs": 33,
-    "ecmwf_aifs": 37,
-    "ncep_gfs": 10,
-    "dwd_icon": 20
-  },
-  "train_rmse_per_model": {
-    "ecmwf_ifs": 1.7352,
-    "ecmwf_aifs": 1.6554,
-    "ncep_gfs": 3.2404,
-    "dwd_icon": 2.2318
+  "rows_per_variable": {
+    "wind_speed": 22464,
+    "rainfall": 21474,
+    "temperature": 21042,
+    "pressure": 21024
   },
   "replay": {
     "available": true,
@@ -135,69 +501,20 @@
   },
   "artifacts": {
     "aligned_csv": "aligned_multi_season_lead_data.csv",
-    "meta_model": "xgboost_meta_temperature.joblib",
-    "blend_test_results": "blend_test_results.csv",
+    "validation_summary_csv": "variable_validation_summary.csv",
+    "meta_models": {
+      "temperature": "xgboost_meta_temperature.joblib",
+      "rainfall": "xgboost_meta_rainfall.joblib",
+      "wind_speed": "xgboost_meta_wind_speed.joblib",
+      "pressure": "xgboost_meta_pressure.joblib"
+    },
+    "blend_test_results": {
+      "temperature": "blend_test_results_temperature.csv",
+      "rainfall": "blend_test_results_rainfall.csv",
+      "wind_speed": "blend_test_results_wind_speed.csv",
+      "pressure": "blend_test_results_pressure.csv"
+    },
     "replay_timelines": "timelines.json"
   },
-  "held_out_test_systems": [
-    "ecmwf_ifs",
-    "ecmwf_aifs",
-    "ncep_gfs",
-    "dwd_icon",
-    "equal_blend",
-    "static_inverse_rmse_blend",
-    "varuna_adaptive"
-  ],
-  "held_out_test_headline": {
-    "ecmwf_ifs": {
-      "n": 4512,
-      "rmse": 1.195,
-      "mae": 0.924,
-      "bias": -0.561,
-      "pearson_r": 0.973
-    },
-    "ecmwf_aifs": {
-      "n": 4512,
-      "rmse": 1.105,
-      "mae": 0.866,
-      "bias": 0.51,
-      "pearson_r": 0.981
-    },
-    "ncep_gfs": {
-      "n": 4512,
-      "rmse": 2.32,
-      "mae": 1.874,
-      "bias": 0.674,
-      "pearson_r": 0.93
-    },
-    "dwd_icon": {
-      "n": 4512,
-      "rmse": 1.131,
-      "mae": 0.876,
-      "bias": 0.056,
-      "pearson_r": 0.969
-    },
-    "equal_blend": {
-      "n": 4512,
-      "rmse": 0.96,
-      "mae": 0.759,
-      "bias": 0.17,
-      "pearson_r": 0.978
-    },
-    "static_inverse_rmse_blend": {
-      "n": 4512,
-      "rmse": 0.787,
-      "mae": 0.622,
-      "bias": 0.082,
-      "pearson_r": 0.984
-    },
-    "varuna_adaptive": {
-      "n": 4512,
-      "rmse": 0.78,
-      "mae": 0.612,
-      "bias": 0.066,
-      "pearson_r": 0.984
-    }
-  },
-  "duration_s": 26.1
+  "duration_s": 36.8
 }

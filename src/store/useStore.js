@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { REGIONS, getDeterministicForecast } from '../data/mockData.js';
 import { APPLICATION_MODES } from '../providers/types.js';
-import { getProviderMemberForecasts } from '../providers/index.js';
+import { fetchForecast } from '../services/api.js';
 
 export const useStore = create((set, get) => ({
   // Theme: light | dark
@@ -102,38 +102,23 @@ export const useStore = create((set, get) => ({
 
       try {
         const { selectedRegionId, selectedVariable, selectedLeadTime } = get();
-        const activeRegion = REGIONS.find((r) => r.id === selectedRegionId) || REGIONS[0];
-        const activeVar = { id: selectedVariable, unit: 'mm' };
-        const leadHours = parseInt(selectedLeadTime, 10) || 48;
-
-        const liveResult = await getProviderMemberForecasts({
-          region: activeRegion,
-          variable: activeVar,
-          leadTimeHours: leadHours,
-          mode: APPLICATION_MODES.LIVE,
+        await fetchForecast({
+          region: selectedRegionId,
+          variable: selectedVariable,
+          leadTime: selectedLeadTime,
         });
 
-        if (liveResult.mode === APPLICATION_MODES.LIVE) {
-          set({
-            effectiveMode: APPLICATION_MODES.LIVE,
-            syncStatus: 'CONNECTED',
-            syncErrorNote: null,
-            loading: false,
-          });
-        } else {
-          // Live provider unavailable, fall back safely to DEMO mode (Section 12)
-          set({
-            effectiveMode: APPLICATION_MODES.DEMO,
-            syncStatus: 'FALLBACK_DEMO',
-            syncErrorNote: 'Live external provider sync unavailable. Active mode maintained as DEMO.',
-            loading: false,
-          });
-        }
-      } catch {
         set({
-          effectiveMode: APPLICATION_MODES.DEMO,
-          syncStatus: 'FALLBACK_DEMO',
-          syncErrorNote: 'Live provider connection failed. Reverted to DEMO mode.',
+          effectiveMode: APPLICATION_MODES.LIVE,
+          syncStatus: 'CONNECTED',
+          syncErrorNote: null,
+          loading: false,
+        });
+      } catch (err) {
+        set({
+          effectiveMode: APPLICATION_MODES.LIVE,
+          syncStatus: 'UNAVAILABLE',
+          syncErrorNote: err.message || 'Live provider sync unavailable.',
           loading: false,
         });
       }
@@ -162,9 +147,18 @@ export const useStore = create((set, get) => ({
   // Helper selector for active forecast calculation
   getCurrentForecast: () => {
     const { selectedRegionId, regionalForecasts, selectedVariable, selectedLeadTime, effectiveMode } = get();
-    if (regionalForecasts && regionalForecasts.length > 0 && regionalForecasts[0]?.forecast?.variable?.id === selectedVariable) {
-      const match = regionalForecasts.find((r) => r.id === selectedRegionId);
-      if (match?.forecast) return match.forecast;
+    const leadH = typeof selectedLeadTime === 'string'
+      ? (selectedLeadTime.endsWith('d') ? parseInt(selectedLeadTime, 10) * 24 : parseInt(selectedLeadTime, 10))
+      : (selectedLeadTime || 48);
+
+    if (regionalForecasts && regionalForecasts.length > 0) {
+      const sample = regionalForecasts[0]?.forecast;
+      const varMatches = sample?.variable?.id === selectedVariable;
+      const leadMatches = sample && (sample.leadHours === leadH || sample.leadTime === selectedLeadTime || sample.leadTime === `+${leadH}h`);
+      if (varMatches && leadMatches) {
+        const match = regionalForecasts.find((r) => r.id === selectedRegionId);
+        if (match?.forecast) return match.forecast;
+      }
     }
     if (effectiveMode === 'DEMO' || effectiveMode === 'REPLAY') {
       return getDeterministicForecast(selectedRegionId, selectedVariable, selectedLeadTime, effectiveMode);
@@ -175,10 +169,21 @@ export const useStore = create((set, get) => ({
   // Helper selector for region list with forecast attached
   getRegionalForecasts: () => {
     const { filters, regionalForecasts, selectedVariable, selectedLeadTime, effectiveMode } = get();
-    let list;
-    if (regionalForecasts && regionalForecasts.length > 0 && regionalForecasts[0]?.forecast?.variable?.id === selectedVariable) {
-      list = regionalForecasts.map((item) => ({ ...item }));
-    } else {
+    const leadH = typeof selectedLeadTime === 'string'
+      ? (selectedLeadTime.endsWith('d') ? parseInt(selectedLeadTime, 10) * 24 : parseInt(selectedLeadTime, 10))
+      : (selectedLeadTime || 48);
+
+    let list = null;
+    if (regionalForecasts && regionalForecasts.length > 0) {
+      const sample = regionalForecasts[0]?.forecast;
+      const varMatches = sample?.variable?.id === selectedVariable;
+      const leadMatches = sample && (sample.leadHours === leadH || sample.leadTime === selectedLeadTime || sample.leadTime === `+${leadH}h`);
+      if (varMatches && leadMatches) {
+        list = regionalForecasts.map((item) => ({ ...item }));
+      }
+    }
+
+    if (!list) {
       list = REGIONS.map((region) => {
         // Fallback placeholder before initial load resolves
         const forecast = (effectiveMode === 'DEMO' || effectiveMode === 'REPLAY')

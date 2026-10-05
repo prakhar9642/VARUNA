@@ -10,6 +10,7 @@ export default function ForecastLayer({ dotsOnly = false }) {
   const selectRegion = useStore((s) => s.selectRegion);
   const selectedModelLayer = useStore((s) => s.selectedModelLayer);
   const selectedVariable = useStore((s) => s.selectedVariable);
+  const selectedLeadTime = useStore((s) => s.selectedLeadTime);
   const regionalForecasts = useStore((s) => s.regionalForecasts);
   const effectiveMode = useStore((s) => s.effectiveMode);
 
@@ -38,13 +39,20 @@ export default function ForecastLayer({ dotsOnly = false }) {
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    const isVariableMatch = regionalForecasts && regionalForecasts.length > 0 && regionalForecasts[0]?.forecast?.variable?.id === selectedVariable;
-    const activeList = isVariableMatch
+    const leadH = typeof selectedLeadTime === 'string'
+      ? (selectedLeadTime.endsWith('d') ? parseInt(selectedLeadTime, 10) * 24 : parseInt(selectedLeadTime, 10))
+      : (selectedLeadTime || 48);
+
+    const sample = regionalForecasts?.[0]?.forecast;
+    const isVariableMatch = sample?.variable?.id === selectedVariable;
+    const isLeadMatch = sample && (sample.leadHours === leadH || sample.leadTime === selectedLeadTime || sample.leadTime === `+${leadH}h`);
+
+    const activeList = (isVariableMatch && isLeadMatch)
       ? regionalForecasts
       : REGIONS.map((r) => ({
           ...r,
           forecast: (effectiveMode === 'DEMO' || effectiveMode === 'REPLAY')
-            ? getDeterministicForecast(r.id, selectedVariable || 'temperature', '48h', effectiveMode)
+            ? getDeterministicForecast(r.id, selectedVariable || 'temperature', selectedLeadTime || '48h', effectiveMode)
             : null,
         }));
 
@@ -253,7 +261,7 @@ export default function ForecastLayer({ dotsOnly = false }) {
         popupRef.current = null;
       }
     };
-  }, [map, mapReady, selectedRegionId, selectedModelLayer, regionalForecasts, selectedVariable, selectRegion]);
+  }, [map, mapReady, selectedRegionId, selectedModelLayer, regionalForecasts, selectedVariable, selectedLeadTime, selectRegion, dotsOnly, effectiveMode, flyTo]);
 
   return null;
 }

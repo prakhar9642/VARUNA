@@ -292,13 +292,7 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
   // Selected target forecast point: require exact match for requested lead
   const exactTarget = timeline.find((curr) => curr.lead_time_hours === leadH);
   const isLeadAvailable = Boolean(exactTarget);
-  const target = exactTarget || (timeline.length > 0 ? null : {
-    time: issued_at,
-    lead_time_hours: leadH,
-    blend: 0.0,
-    models: { ecmwf_ifs: 0.0, ecmwf_aifs: 0.0, ncep_gfs: 0.0, dwd_icon: 0.0 },
-    weights: { ecmwf_ifs: 25, ecmwf_aifs: 25, ncep_gfs: 25, dwd_icon: 25 },
-  });
+  const target = exactTarget || null;
 
   const members = target ? (target.models || {}) : {};
   const weights = target ? (target.weights || {}) : {};
@@ -327,8 +321,6 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
   };
 
   // Identify top driving model from real adaptive weights
-  const allWeightsEqual = weightValues.length > 0 && weightValues.every((w) => w === weightValues[0]);
-
   const topKey = Object.keys(weights).reduce((best, curr) => {
     return (weights[curr] || 0) > (weights[best] || 0) ? curr : best;
   }, 'ecmwf_ifs');
@@ -336,7 +328,7 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
   const topModelMeta = CANONICAL_MODEL_NAMES[topKey] || { name: topKey };
   const topWeight = weights[topKey] || 0;
 
-  const isAdaptive = variable === 'temperature' && weighting_scheme === 'adaptive_xgboost' && !allWeightsEqual;
+  const isAdaptive = weighting_scheme === 'adaptive_xgboost';
 
   // Model breakdowns
   // Model breakdowns
@@ -457,8 +449,21 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
     horizonNote: isLeadAvailable ? horizon_note : (horizon_note || `Forecast point for +${leadH}h lead is unavailable in source NWP series.`),
     weightingScheme: weighting_scheme,
     weightingReason: weighting_reason,
-    predictedErrors: target?.predicted_errors || null,
-    provenance: { attribution, models_used, degraded, validated, weighting_scheme, weighting_reason },
+    provenance: {
+      region: region_id,
+      variable,
+      lead_time_hours: actualLeadH,
+      models_used,
+      acquisition_path: 'browser_open_meteo_direct',
+      processing_endpoint: `${getApiBase()}/api/forecast/process`,
+      weighting_scheme,
+      weighting_reason,
+      validated,
+      data_mode,
+      timestamp: issued_at,
+      attribution,
+      degraded,
+    },
   };
 }
 
@@ -467,7 +472,7 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
  * so subsequent calls to /api/weights, /api/explain, /api/extremes, or /api/analyze
  * hit the local cache and never call Open-Meteo from Render (preventing 429 errors).
  */
-async function ensureServerWarmed(regionId, leadH = 48) {
+async function ensureServerWarmed(regionId, leadH = 48, variable = 'temperature') {
   try {
     let cached = clientSeriesCache.get(regionId);
     const now = Date.now();
@@ -484,7 +489,7 @@ async function ensureServerWarmed(regionId, leadH = 48) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           region: regionId,
-          variable: 'temperature',
+          variable,
           lead_time_hours: leadH,
           series: cached.series,
         }),
@@ -503,7 +508,7 @@ export async function fetchWeights({ region = 'delhi_ncr', variable = 'temperatu
     ? (leadTime.endsWith('d') ? parseInt(leadTime, 10) * 24 : parseInt(leadTime, 10))
     : (leadTime || 48);
 
-  await ensureServerWarmed(region, leadH);
+  await ensureServerWarmed(region, leadH, variable);
 
   const params = new URLSearchParams({ region, variable, lead_time_hours: leadH });
   const response = await fetch(`${getApiBase()}/api/weights?${params.toString()}`);
@@ -539,7 +544,7 @@ export async function fetchExtremes({ region = 'delhi_ncr', leadTime = '48h', si
     ? (leadTime.endsWith('d') ? parseInt(leadTime, 10) * 24 : parseInt(leadTime, 10))
     : (leadTime || 48);
 
-  await ensureServerWarmed(region, leadH);
+  await ensureServerWarmed(region, leadH, 'rainfall');
 
   const params = new URLSearchParams();
   if (region) params.append('region', region);
@@ -560,7 +565,7 @@ export async function fetchExplain({ region = 'delhi_ncr', variable = 'temperatu
     ? (leadTime.endsWith('d') ? parseInt(leadTime, 10) * 24 : parseInt(leadTime, 10))
     : (leadTime || 48);
 
-  await ensureServerWarmed(region, leadH);
+  await ensureServerWarmed(region, leadH, variable);
 
   const params = new URLSearchParams({
     region,
@@ -582,7 +587,7 @@ export async function fetchAnalyze({ region = 'delhi_ncr', variable = 'temperatu
     ? (leadTime.endsWith('d') ? parseInt(leadTime, 10) * 24 : parseInt(leadTime, 10))
     : (leadTime || 48);
 
-  await ensureServerWarmed(region, leadH);
+  await ensureServerWarmed(region, leadH, variable);
 
   const response = await fetch(`${getApiBase()}/api/analyze`, {
     method: 'POST',
@@ -636,16 +641,30 @@ async function runWithConcurrency(items, limit, fn) {
  * Uses a single browser-side multi-coordinate Open-Meteo request and a single
  * POST /api/forecast/process batch call to Render, eliminating provider rate limits.
  */
-export async function fetchRegionalForecasts({ variable = 'temperature', leadTime = '48h' } = {}) {
+export async function fetchRegionalForecasts(arg1 = {}, arg2 = 'temperature', arg3 = '48h') {
+  let regions = REGIONS;
+  let variable = 'temperature';
+  let leadTime = '48h';
+
+  if (Array.isArray(arg1)) {
+    regions = arg1;
+    variable = typeof arg2 === 'string' ? arg2 : 'temperature';
+    leadTime = arg3 || '48h';
+  } else if (typeof arg1 === 'object' && arg1 !== null) {
+    if (arg1.regions) regions = arg1.regions;
+    if (arg1.variable) variable = arg1.variable;
+    if (arg1.leadTime) leadTime = arg1.leadTime;
+  }
+
   const leadH = typeof leadTime === 'string'
     ? (leadTime.endsWith('d') ? parseInt(leadTime, 10) * 24 : parseInt(leadTime, 10))
     : (leadTime || 48);
 
   // Primary Path: Single-batch browser Open-Meteo fetch + Render batch processing
   try {
-    const seriesMap = await fetchOpenMeteoBatch(REGIONS);
+    const seriesMap = await fetchOpenMeteoBatch(regions);
     const batch = [];
-    for (const r of REGIONS) {
+    for (const r of regions) {
       if (seriesMap[r.id]) {
         batch.push({
           region: r.id,
@@ -656,7 +675,7 @@ export async function fetchRegionalForecasts({ variable = 'temperature', leadTim
       }
     }
 
-    if (batch.length === REGIONS.length) {
+    if (batch.length === regions.length) {
       const response = await fetch(`${getApiBase()}/api/forecast/process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -668,7 +687,7 @@ export async function fetchRegionalForecasts({ variable = 'temperature', leadTim
         const results = data.results || [];
         const resultMap = new Map(results.map((res) => [res.region_id, res]));
 
-        return REGIONS.map((region) => {
+        return regions.map((region) => {
           const raw = resultMap.get(region.id);
           if (raw) {
             return {
@@ -690,7 +709,7 @@ export async function fetchRegionalForecasts({ variable = 'temperature', leadTim
   }
 
   // Fallback Path: Sequential requests via fetchForecast
-  return runWithConcurrency(REGIONS, 1, async (region) => {
+  return runWithConcurrency(regions, 1, async (region) => {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const forecast = await fetchForecast({

@@ -8,7 +8,7 @@ import { MapContext, BASEMAP_STYLES } from './mapContext';
 if (typeof window !== 'undefined' && typeof setWorkerUrl === 'function') {
   try {
     setWorkerUrl(maplibreWorkerUrl);
-  } catch (e) {
+  } catch {
     // Ignore worker registration fallback
   }
 }

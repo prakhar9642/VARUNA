@@ -146,9 +146,7 @@ export default function Forecast() {
     models.icon?.weight,
   ].filter((w) => typeof w === 'number');
 
-  const allWeightsEqual = modelWeights.length > 0 && modelWeights.every((w) => w === modelWeights[0]);
-  const currentVariableId = variable.id || selectedVariable;
-  const isAdaptive = currentVariableId === 'temperature' && weightingScheme === 'adaptive_xgboost' && !allWeightsEqual;
+  const isAdaptive = weightingScheme === 'adaptive_xgboost';
 
   const weightsSum = (
     (models.ifs?.weight || 0) +
@@ -560,7 +558,7 @@ export default function Forecast() {
           subtitle={
             isAdaptive
               ? 'Real-time contextual weights allocated by Python XGBoost meta-model based on synoptic conditions'
-              : `Operational Equal-Weight Ensemble. ML weighting is not yet trained or validated for ${variable.label || selectedVariable}.`
+              : (weightingReason || `Operational Equal-Weight Ensemble (25% each) for ${variable.label || selectedVariable}.`)
           }
           badge={
             isUnavailable

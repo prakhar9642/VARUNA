@@ -36,7 +36,7 @@ export default function Skill() {
 
   // Authoritative API data state
   const [skillApiData, setSkillApiData] = useState(null);
-  const [skillSource, setSkillSource] = useState('loading'); // 'live_api' | 'offline_snapshot'
+  const [skillSource, setSkillSource] = useState('loading'); // 'live_api' | 'offline_snapshot' | 'unavailable'
   const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
@@ -48,14 +48,25 @@ export default function Skill() {
           setSkillApiData(data);
           setSkillSource('live_api');
           setApiError(null);
-        } else {
+        } else if (selectedVariable === 'temperature') {
           setSkillSource('offline_snapshot');
+          setApiError(null);
+        } else {
+          setSkillApiData(null);
+          setSkillSource('unavailable');
+          setApiError(data?.message || `Validation not available for ${selectedVariable}.`);
         }
       })
       .catch((err) => {
         if (!isMounted) return;
-        setSkillSource('offline_snapshot');
-        setApiError(err.message || 'API connection failed');
+        if (selectedVariable === 'temperature') {
+          setSkillSource('offline_snapshot');
+          setApiError(err.message || 'API connection failed');
+        } else {
+          setSkillApiData(null);
+          setSkillSource('unavailable');
+          setApiError(err.message || 'API connection failed');
+        }
       });
 
     return () => {
@@ -65,13 +76,14 @@ export default function Skill() {
 
   const region = REGIONS.find((r) => r.id === selectedRegionId) || REGIONS[0];
   const variable = VARIABLES.find((v) => v.id === selectedVariable) || VARIABLES[0];
-  const unit = variable.unit || '°C';
+  const unit = skillApiData?.unit || variable.unit || '°C';
 
-  // Authoritative empirical verification data: live API data if available, with offline report snapshot fallback
-  const heldOutMetrics = getHeldOutTestMetrics(skillApiData?.headline?.rows);
-  const leadDegradationData = getLeadDegradationCurve(skillApiData?.by_lead?.rows);
-  const seasonalSkillData = getSeasonalBreakdown(skillApiData?.by_season?.rows);
-  const regionalRegimeData = getRegionalRegimeVerification(skillApiData?.by_region?.rows);
+  // Authoritative empirical verification data: live API data if available, with offline report snapshot fallback (for temperature only)
+  const sourceRows = skillApiData?.headline?.rows || (selectedVariable === 'temperature' ? undefined : []);
+  const heldOutMetrics = getHeldOutTestMetrics(sourceRows);
+  const leadDegradationData = getLeadDegradationCurve(skillApiData?.by_lead?.rows || (selectedVariable === 'temperature' ? undefined : []));
+  const seasonalSkillData = getSeasonalBreakdown(skillApiData?.by_season?.rows || (selectedVariable === 'temperature' ? undefined : []));
+  const regionalRegimeData = getRegionalRegimeVerification(skillApiData?.by_region?.rows || (selectedVariable === 'temperature' ? undefined : []));
 
   // Test Partition Direct Model Comparison (7 models / baselines / blends)
   const testComparisonData = heldOutMetrics.records.map((r) => ({
@@ -194,41 +206,93 @@ export default function Skill() {
         </div>
       </div>
 
-      {/* Metric Cards Strip (Held-Out Test Set N = 4,512) */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-        <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
-          <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Blend RMSE</span>
-          <span className="font-data text-2xl font-bold text-[var(--varuna-blue-dark)] block mt-0.5">{heldOutMetrics.blendRmse} {unit}</span>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold font-data">-{heldOutMetrics.reductionVsIfs}% vs best NWP</span>
+      {skillSource === 'unavailable' ? (
+        <div className="p-8 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-xl)] shadow-xs text-center space-y-4 font-data">
+          <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-2xl font-bold">
+            ⚠
+          </div>
+          <h2 className="text-scale-lg font-bold text-[var(--varuna-text)]">
+            Validation Benchmark Not Available for {variable.label}
+          </h2>
+          <p className="text-scale-sm text-[var(--varuna-text-secondary)] max-w-xl mx-auto leading-relaxed">
+            {apiError || `Empirical verification benchmarks have not been generated for ${variable.label}. VARUNA strictly enforces scientific integrity and does not display fabricated metrics or borrow evaluation data from other atmospheric variables.`}
+          </p>
+          <div className="text-[11px] text-[var(--varuna-text-muted)]">
+            Run the verification pipeline: <code>python scripts/run_pipeline.py --variables {selectedVariable}</code>
+          </div>
         </div>
-        <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
-          <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Mean Abs Error (MAE)</span>
-          <span className="font-data text-2xl font-bold text-[var(--varuna-text)] block mt-0.5">{heldOutMetrics.blendMae} {unit}</span>
-          <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Mean Absolute Error</span>
-        </div>
-        <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
-          <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Systematic Bias</span>
-          <span className="font-data text-2xl font-bold text-emerald-700 dark:text-emerald-400 block mt-0.5">+{heldOutMetrics.blendBias} {unit}</span>
-          <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Near-zero residual</span>
-        </div>
-        <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
-          <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Pearson Correlation (r)</span>
-          <span className="font-data text-2xl font-bold text-[var(--varuna-blue)] block mt-0.5">{heldOutMetrics.blendCorrelation}</span>
-          <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Pearson r coefficient (0-1)</span>
-        </div>
-        <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs col-span-2 md:col-span-1">
-          <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Verified Samples</span>
-          <span className="font-data text-2xl font-bold text-[var(--varuna-text)] block mt-0.5">{heldOutMetrics.testSampleCount.toLocaleString()}</span>
-          <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Held-Out Test Records</span>
-        </div>
-      </div>
+      ) : (
+        <>
+          {/* Variable Validation Status Banner */}
+          <div className={`p-4 rounded-[var(--radius-lg)] border font-data flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+            (selectedVariable === 'temperature' || selectedVariable === 'pressure')
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200'
+              : 'bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-200'
+          }`}>
+            <div className="flex items-start gap-2.5">
+              <span className="text-base font-bold mt-0.5">
+                {(selectedVariable === 'temperature' || selectedVariable === 'pressure') ? '✓' : '⚠'}
+              </span>
+              <div>
+                <div className="font-bold text-scale-sm">
+                  {(selectedVariable === 'temperature' || selectedVariable === 'pressure')
+                    ? `${variable.label}: Validated vs Held-Out ERA5 Benchmark (Promoted to Adaptive XGBoost)`
+                    : `${variable.label}: Held-Out Gate Not Passed (Operational Equal-Weight Consensus Maintained)`}
+                </div>
+                <div className="text-[12px] opacity-80 mt-0.5">
+                  {selectedVariable === 'temperature' && 'Adaptive RMSE 0.78 °C (+29.4% improvement over best single NWP center, +18.7% over equal blend).'}
+                  {selectedVariable === 'pressure' && 'Adaptive RMSE 0.67 hPa (+9.9% improvement over best single NWP center, +19.5% over equal blend).'}
+                  {selectedVariable === 'wind_speed' && 'Adaptive RMSE 2.22 km/h underperforms equal blend (2.14 km/h) across all leads and on high-wind deciles. Retaining equal consensus.'}
+                  {selectedVariable === 'rainfall' && 'Adaptive model degrades wet-event hit rate (POD 75.2% vs 89.2% for equal blend; 475 misses vs 206). Retaining equal consensus.'}
+                </div>
+              </div>
+            </div>
+            <span className={`text-[11px] font-bold px-2.5 py-1 rounded shrink-0 border ${
+              (selectedVariable === 'temperature' || selectedVariable === 'pressure')
+                ? 'bg-emerald-600 text-white border-emerald-700'
+                : 'bg-amber-600 text-white border-amber-700'
+            }`}>
+              {(selectedVariable === 'temperature' || selectedVariable === 'pressure') ? 'VALIDATED · ADAPTIVE' : 'EQUAL CONSENSUS FALLBACK'}
+            </span>
+          </div>
+
+          {/* Metric Cards Strip (Held-Out Test Set N = 4,512) */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+            <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
+              <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Blend RMSE</span>
+              <span className="font-data text-2xl font-bold text-[var(--varuna-blue-dark)] block mt-0.5">{heldOutMetrics.blendRmse} {unit}</span>
+              <span className={`text-[11px] font-semibold font-data ${heldOutMetrics.reductionVsBestNwp >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                {heldOutMetrics.reductionVsBestNwp >= 0 ? `-${heldOutMetrics.reductionVsBestNwp}%` : `+${Math.abs(heldOutMetrics.reductionVsBestNwp)}%`} vs {heldOutMetrics.bestNwpName}
+              </span>
+            </div>
+            <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
+              <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Mean Abs Error (MAE)</span>
+              <span className="font-data text-2xl font-bold text-[var(--varuna-text)] block mt-0.5">{heldOutMetrics.blendMae} {unit}</span>
+              <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Mean Absolute Error</span>
+            </div>
+            <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
+              <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Systematic Bias</span>
+              <span className="font-data text-2xl font-bold text-emerald-700 dark:text-emerald-400 block mt-0.5">+{heldOutMetrics.blendBias} {unit}</span>
+              <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Near-zero residual</span>
+            </div>
+            <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs">
+              <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Pearson Correlation (r)</span>
+              <span className="font-data text-2xl font-bold text-[var(--varuna-blue)] block mt-0.5">{heldOutMetrics.blendCorrelation}</span>
+              <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Pearson r coefficient (0-1)</span>
+            </div>
+            <div className="p-3.5 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-xs col-span-2 md:col-span-1">
+              <span className="text-[10px] font-bold text-[var(--varuna-text-muted)] uppercase block font-data">Verified Samples</span>
+              <span className="font-data text-2xl font-bold text-[var(--varuna-text)] block mt-0.5">{heldOutMetrics.testSampleCount.toLocaleString()}</span>
+              <span className="text-[11px] text-[var(--varuna-text-secondary)] font-data">Held-Out Test Records</span>
+            </div>
+          </div>
 
       {/* Main Empirical Verification Chart — Switches dynamically across dimensions */}
       {activeDimension === 'lead' && (
         <ChartCard
-          title="Empirical Lead-Time Error Degradation Curve (RMSE °C)"
+          title={`Empirical Lead-Time Error Degradation Curve (RMSE ${unit})`}
           subtitle={`Multi-model root mean square error across 24h, 48h, 72h, and 120h lead times for ${region.name} (${variable.label})`}
-          badge="Lead Time (24h-120h) · N = 21,042"
+          badge={`Lead Time (24h-120h) · ${variable.label}`}
           span="full"
         >
           <ResponsiveContainer width="100%" height={320}>
@@ -269,9 +333,9 @@ export default function Skill() {
 
       {activeDimension === 'season' && (
         <ChartCard
-          title="Empirical Seasonal Verification Benchmark (RMSE °C)"
-          subtitle={`Multi-model verification across 4 meteorological seasons (N = 21,042 records vs ERA5 reference)`}
-          badge="Seasonal Skill Breakdown"
+          title={`Empirical Seasonal Verification Benchmark (RMSE ${unit})`}
+          subtitle={`Multi-model verification across 4 meteorological seasons (${variable.label} vs ERA5 reference)`}
+          badge={`Seasonal Skill Breakdown · ${variable.label}`}
           span="full"
         >
           <ResponsiveContainer width="100%" height={320}>
@@ -312,9 +376,9 @@ export default function Skill() {
 
       {activeDimension === 'region' && (
         <ChartCard
-          title="Empirical Regional Synoptic Zone Verification (RMSE °C)"
-          subtitle={`Root mean square error across 6 Indian micro-climatic zones (N = 3,507 samples per zone vs ERA5 reference)`}
-          badge="Micro-Climatic Regimes"
+          title={`Empirical Regional Synoptic Zone Verification (RMSE ${unit})`}
+          subtitle={`Root mean square error across 6 Indian micro-climatic zones (${variable.label} vs ERA5 reference)`}
+          badge={`Micro-Climatic Regimes · ${variable.label}`}
           span="full"
         >
           <ResponsiveContainer width="100%" height={320}>
@@ -405,7 +469,7 @@ export default function Skill() {
                   color: 'var(--varuna-text)',
                 }}
               />
-              <Bar dataKey="rmse" name="Test RMSE (°C)" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="rmse" name={`Test RMSE (${unit})`} radius={[4, 4, 0, 0]}>
                 {testComparisonData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -414,6 +478,8 @@ export default function Skill() {
           </ResponsiveContainer>
         </ChartCard>
       </div>
+        </>
+      )}
     </div>
   );
 }

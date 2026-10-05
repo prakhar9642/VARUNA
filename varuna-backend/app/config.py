@@ -18,8 +18,29 @@ CACHE_DB_PATH = CACHE_DIR / "varuna_cache.sqlite3"
 ALIGNED_CSV = DATA_DIR / "aligned_multi_season_lead_data.csv"
 PROVENANCE_JSON = DATA_DIR / "provenance.json"
 REPLAY_TIMELINES = REPLAY_DIR / "timelines.json"
-META_MODEL_PATH = MODELS_DIR / "xgboost_meta_temperature.joblib"
+
+META_MODEL_PATHS: dict[str, Path] = {
+    "temperature": MODELS_DIR / "xgboost_meta_temperature.joblib",
+    "rainfall": MODELS_DIR / "xgboost_meta_rainfall.joblib",
+    "wind_speed": MODELS_DIR / "xgboost_meta_wind_speed.joblib",
+    "pressure": MODELS_DIR / "xgboost_meta_pressure.joblib",
+}
+META_MODEL_PATH = META_MODEL_PATHS["temperature"]
+
+BLEND_TEST_CSVS: dict[str, Path] = {
+    "temperature": REPORTS_DIR / "blend_test_results_temperature.csv",
+    "rainfall": REPORTS_DIR / "blend_test_results_rainfall.csv",
+    "wind_speed": REPORTS_DIR / "blend_test_results_wind_speed.csv",
+    "pressure": REPORTS_DIR / "blend_test_results_pressure.csv",
+}
 BLEND_TEST_CSV = REPORTS_DIR / "blend_test_results.csv"
+VALIDATION_SUMMARY_CSV = REPORTS_DIR / "variable_validation_summary.csv"
+
+VALIDATED_VARIABLES: set[str] = {"temperature", "pressure"}
+
+
+def is_variable_validated(variable: str) -> bool:
+    return variable in VALIDATED_VARIABLES
 
 APP_VERSION = "1.0.0"
 
@@ -106,7 +127,7 @@ VARIABLES: dict[str, dict] = {
     "temperature": {"openmeteo": "temperature_2m", "unit": "\u00b0C", "validated": True},
     "rainfall": {"openmeteo": "precipitation", "unit": "mm", "validated": False},
     "wind_speed": {"openmeteo": "wind_speed_10m", "unit": "km/h", "validated": False},
-    "pressure": {"openmeteo": "surface_pressure", "unit": "hPa", "validated": False},
+    "pressure": {"openmeteo": "surface_pressure", "unit": "hPa", "validated": True},
 }
 VARIABLE_KEYS: list[str] = list(VARIABLES.keys())
 

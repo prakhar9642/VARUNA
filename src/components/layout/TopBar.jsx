@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
-import { NAV_SECTIONS } from './NavDrawer';
+import { NAV_SECTIONS } from './navSections';
 
 export default function TopBar() {
   const location = useLocation();
