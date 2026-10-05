@@ -137,7 +137,7 @@ export const VARIABLES = [
   { id: 'rainfall', label: 'Rainfall', unit: 'mm', icon: '🌧️', precision: 1, validated: false },
   { id: 'temperature', label: 'Temperature', unit: '°C', icon: '🌡️', precision: 1, validated: true },
   { id: 'wind_speed', label: 'Wind Speed', unit: 'km/h', icon: '💨', precision: 1, validated: false },
-  { id: 'pressure', label: 'Surface Pressure', unit: 'hPa', icon: '🧭', precision: 1, validated: false },
+  { id: 'pressure', label: 'Surface Pressure', unit: 'hPa', icon: '🧭', precision: 1, validated: true },
 ];
 
 export const LEAD_TIMES = ['24h', '48h', '72h', '120h'];

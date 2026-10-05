@@ -252,7 +252,7 @@ export default function Skill() {
                 ? 'bg-emerald-600 text-white border-emerald-700'
                 : 'bg-amber-600 text-white border-amber-700'
             }`}>
-              {(selectedVariable === 'temperature' || selectedVariable === 'pressure') ? 'VALIDATED · ADAPTIVE' : 'EQUAL CONSENSUS FALLBACK'}
+              {(selectedVariable === 'temperature' || selectedVariable === 'pressure') ? 'VALIDATED · ADAPTIVE' : 'EQUAL-WEIGHT CONSENSUS'}
             </span>
           </div>
 

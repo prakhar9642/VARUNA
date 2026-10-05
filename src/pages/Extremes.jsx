@@ -69,7 +69,7 @@ export default function Extremes() {
           
           const thresholdStandard = alert.validated
             ? `Threshold standard: ${alert.threshold_label} · Blend has a held-out ERA5 benchmark.`
-            : `Threshold standard: ${alert.threshold_label} · Operational equal-weight consensus; held-out ML validation not passed.`;
+            : `Threshold standard: ${alert.threshold_label} · Operational equal-weight consensus (adaptive candidate not promoted).`;
 
           mapped.push({
             id: res.region.id + '-' + alert.hazard,
@@ -78,7 +78,7 @@ export default function Extremes() {
             type: type,
             hazard: alert.hazard,
             leadTime: `+${res.data.lead_time_hours || 48}h`,
-            validationStatus: alert.validated ? 'Held-Out Benchmark Validated' : 'Operational Consensus (Unvalidated)',
+            validationStatus: alert.validated ? 'Held-Out Benchmark Validated' : 'Operational Equal-Weight Consensus',
             blendMethod: alert.validated ? 'Adaptive XGBoost Apportionment' : 'Equal-Weight Consensus',
             value: alert.value + ' ' + alert.unit,
             threshold: alert.threshold_label,

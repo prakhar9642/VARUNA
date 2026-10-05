@@ -400,7 +400,7 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
       ? `Forecast for requested lead +${leadH}h is not available in the source NWP series.`
       : (isAdaptive
           ? `${topModelMeta.name} is allocated the highest weight (${topWeight}%) because the XGBoost meta-model predicted the lowest contextual error for ${regionObj.name} at +${actualLeadH}h lead.`
-          : (weighting_reason || 'Equal-weight fallback across available forecast members. No ML meta-model trained or validated for this variable.')),
+          : (weighting_reason || 'Adaptive ML is not promoted for this variable; operational forecast uses equal-weight consensus across the four NWP members.')),
   };
 
   // Recharts timeseries formatting

@@ -674,7 +674,7 @@ export default function Forecast() {
                       `${whyThisBlend.topModel?.name || 'Top model'} is allocated the highest weight because the XGBoost meta-model predicted the lowest contextual error for this region at ${formattedLead} lead.`)
                     : (weightingReason ||
                       whyThisBlend.explanation ||
-                      'Equal-weight fallback across available forecast members. No meta-model trained for this variable yet; equal weights are used and skill is unvalidated.')}
+                      'Adaptive ML is not promoted for this variable; operational forecast uses equal-weight consensus across the four NWP members.')}
               </p>
             </div>
           </div>

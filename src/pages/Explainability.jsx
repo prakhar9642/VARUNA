@@ -558,7 +558,7 @@ export default function Explainability() {
             </div>
             <ul className="text-scale-xs text-[var(--varuna-text-secondary)] space-y-1.5 list-disc pl-4 leading-relaxed font-sans">
               <li>VARUNA does not claim to replace IMD synoptic warnings or official meteorological cyclone advisories.</li>
-              <li>Precipitation and wind speed currently operate on equal-weight consensus (25% each) and are truthfully marked as unvalidated by ML because held-out gate criteria were not met.</li>
+              <li>Precipitation and wind speed have been benchmarked against ERA5; their adaptive ML candidates were not promoted because held-out gate criteria were not met, so operational weighting remains equal consensus (25% each).</li>
               <li>We never display simulated, hardcoded, or demo SHAP values if real model weights are unavailable.</li>
             </ul>
           </div>

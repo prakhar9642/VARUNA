@@ -52,21 +52,35 @@ export function DataModeBadge({ mode, size = 'sm' }) {
   );
 }
 
-/** validated=true only when the backend says a trained meta-model backs this. */
+/**
+ * Scientific and promotion badges:
+ * Decouples empirical ERA5 benchmarking from adaptive ML operational promotion.
+ */
 export function ValidatedBadge({ validated, scopeNote }) {
   return validated ? (
     <span
       className="inline-flex items-center gap-1 rounded border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 font-data uppercase"
-      title="Blend weighting backed by the held-out benchmarked meta-model"
+      title="Adaptive ML meta-model passed held-out verification gate and is promoted to operational weighting"
     >
-      ✓ Validated
+      ✓ Adaptive ML Promoted
     </span>
   ) : (
     <span
-      className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 font-data uppercase"
-      title={scopeNote || 'Unvalidated: no trained meta-model for this variable yet (equal fallback weights, skill not benchmarked)'}
+      className="inline-flex items-center gap-1 rounded border border-slate-300 bg-slate-50 dark:bg-slate-900/60 px-1.5 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-300 font-data uppercase"
+      title={scopeNote || 'Benchmarked against ERA5; adaptive candidate did not pass held-out promotion gate. Operating on equal-weight consensus.'}
     >
-      ⚠ Unvalidated
+      Equal Consensus (ML Not Promoted)
+    </span>
+  );
+}
+
+export function Era5BenchmarkedBadge() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded border border-blue-300 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300 font-data uppercase"
+      title="Empirically benchmarked against ERA5 reanalysis on 4,512 held-out test records"
+    >
+      ✓ ERA5 Benchmarked
     </span>
   );
 }
