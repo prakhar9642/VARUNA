@@ -256,7 +256,7 @@ VARUNA monitors blended forecasts against IMD statutory thresholds:
 
 ## 10. Empirical Verification Protocol
 
-All historical statistical validation is conducted against the **ERA5 reanalysis dataset** (ECMWF Copernicus) across 86,004 authentic observation rows across 6 benchmark regions, 4 forecast windows, and 4 synoptic forecast horizons (+24h, +48h, +72h, +120h):
+All historical statistical validation is conducted against the **ERA5 reanalysis dataset** (ECMWF Copernicus) across aligned historical NWP–ERA5 evaluation rows (86,004 total evaluations across 4 variables: 21,042 temperature, 21,024 pressure, 22,464 wind speed, 21,474 rainfall) over 6 benchmark regions, 4 forecast windows, and 4 synoptic forecast horizons (+24h, +48h, +72h, +120h):
 
 - **Temporal Partitioning:** Chronological split (no random shuffling; strict temporal leakage prevention):
   - **Training Partition (65%):** 55,902 rows (13,170 per variable; Jan 10 – Jul 10, 2026)
@@ -267,7 +267,7 @@ All historical statistical validation is conducted against the **ERA5 reanalysis
 
 | Atmospheric Variable | Best Single NWP (RMSE) | Equal Blend (RMSE) | Static Inv-RMSE (RMSE) | VARUNA Adaptive (RMSE) | Improvement vs Best NWP | Held-Out Gate Decision | Operational Weighting Status |
 | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **2m Temperature** | $1.105^\circ\text{C}$ (AIFS) | $0.960^\circ\text{C}$ | $0.787^\circ\text{C}$ | **$0.780^\circ\text{C}$** | **$+29.4\%$** | **PASS** | **Adaptive XGBoost** (`validated=true`) |
+| **2m Temperature** | $1.105^\circ\text{C}$ (AIFS) | $0.960^\circ\text{C}$ | $0.787^\circ\text{C}$ | **$0.780^\circ\text{C}$** | **$+29.41\%$** | **PASS** | **Adaptive XGBoost** (`validated=true`) |
 | **Surface Pressure** | $0.748\text{ hPa}$ (ICON) | $0.838\text{ hPa}$ | $0.716\text{ hPa}$ | **$0.674\text{ hPa}$** | **$+9.9\%$** | **PASS** | **Adaptive XGBoost** (`validated=true`) |
 | **10m Wind Speed** | $2.427\text{ km/h}$ (AIFS) | **$2.137\text{ km/h}$** | $2.171\text{ km/h}$ | $2.224\text{ km/h}$ | $+8.4\%$ (vs AIFS)<br>*$-4.1\%$ vs Equal* | **FAIL** | **Equal Consensus** (`validated=false`) |
 | **Rainfall** | $0.323\text{ mm}$ (GFS) | $0.282\text{ mm}$ | $0.297\text{ mm}$ | $0.268\text{ mm}$ | $+17.0\%$ (vs GFS)<br>*Wet POD: $75.2\%$ vs $89.2\%$* | **FAIL** | **Equal Consensus** (`validated=false`) |
@@ -281,7 +281,7 @@ All historical statistical validation is conducted against the **ERA5 reanalysis
 - **NOAA GFS:** RMSE $2.320^\circ\text{C}$ | MAE $1.874^\circ\text{C}$ | Bias $+0.674^\circ\text{C}$ | Pearson $r = 0.930$
 - **Equal-Weight Blend:** RMSE $0.960^\circ\text{C}$ | MAE $0.759^\circ\text{C}$ | Bias $+0.170^\circ\text{C}$ | Pearson $r = 0.978$
 - **VARUNA ADAPTIVE BLEND:** **RMSE $0.780^\circ\text{C}$** | **MAE $0.612^\circ\text{C}$** | **Bias $+0.066^\circ\text{C}$** | **Pearson $r = 0.984$**
-- *Empirical Margin:* **$+29.4\%$ RMSE reduction** vs best single NWP ($1.105 \to 0.780^\circ\text{C}$); **$+18.7\%$ reduction** vs equal blend.
+- *Empirical Margin:* **$+29.41\%$ RMSE reduction vs the best single NWP** ($1.105 \to 0.780^\circ\text{C}$); **$+18.75\%$ reduction** vs equal blend.
 
 #### Surface Pressure (hPa):
 - **ECMWF IFS:** RMSE $0.932\text{ hPa}$ | MAE $0.751\text{ hPa}$ | Bias $-0.692\text{ hPa}$ | Pearson $r = 1.000$
