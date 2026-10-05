@@ -994,6 +994,9 @@ def analyze_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
     scheme = fc.get("weighting_scheme", "equal_fallback_untrained")
     is_adaptive = (is_variable_validated(variable) and scheme == "adaptive_xgboost" and predicted_errors is not None)
 
+    best_name = None
+    best_weight = 25
+    best_err = "N/A"
     if is_adaptive and weights:
         best_key = max(weights, key=lambda k: weights.get(k, 0))
         model_display = {
@@ -1004,12 +1007,12 @@ def analyze_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
         }
         best_name = model_display.get(best_key, best_key)
         best_weight = weights[best_key]
-        best_err = f"{predicted_errors[best_key]:.2f} °C" if (predicted_errors and best_key in predicted_errors) else "lowest predicted error"
+        best_err = f"{predicted_errors[best_key]:.2f} {unit}" if (predicted_errors and best_key in predicted_errors) else "lowest predicted error"
         summary = (
             f"VARUNA adaptive ensemble allocated highest weight to {best_name} ({best_weight}%) "
             f"based on XGBoost predicted member error ({best_err}) over {region_name} at +{lead_time_hours}h lead. "
-            f"Ensemble spread across 4 NWP centers is {spread:.1f} °C. "
-            f"Resulting adaptive blend: {blend:.1f} °C."
+            f"Ensemble spread across 4 NWP centers is {spread:.1f} {unit}. "
+            f"Resulting adaptive blend: {blend:.1f} {unit}."
         )
     else:
         summary = (
@@ -1018,6 +1021,172 @@ def analyze_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
             f"Ensemble spread is {spread:.1f} {unit}. "
             f"Resulting consensus blend: {blend:.1f} {unit}."
         )
+
+    # -------------------------------------------------------------------------
+    # Rigorous Meteorological Reliability, Bust Probability & Risk Score
+    # -------------------------------------------------------------------------
+    tau_bust = {
+        "temperature": 2.5,
+        "rainfall": 15.0,
+        "wind_speed": 12.0,
+        "pressure": 2.5,
+    }.get(variable, 2.0)
+
+    baseline_rmse = {
+        "temperature": 0.78,
+        "rainfall": 0.28,
+        "wind_speed": 2.14,
+        "pressure": 0.67,
+    }.get(variable, 1.0)
+
+    err_component = min(predicted_errors.values()) if (is_adaptive and predicted_errors) else baseline_rmse
+    total_uncertainty = max(0.05, math.sqrt(err_component**2 + (0.5 * spread)**2))
+    z = tau_bust / total_uncertainty
+    p_bust = 2.0 * (1.0 - 0.5 * (1.0 + math.erf(z / math.sqrt(2.0))))
+    bust_prob_pct = round(max(5.0, min(95.0, p_bust * 100.0)), 1)
+    confidence_pct = round(max(10.0, min(98.0, 100.0 - bust_prob_pct)), 1)
+
+    from ..config import EXTREME_THRESHOLDS as TH
+    hazard_proximity = 0.0
+    rain_24h = 0.0
+
+    if variable == "temperature":
+        th_val = TH.get("heatwave_c", 45.0)
+        if blend is not None:
+            hazard_proximity = max(0.0, min(100.0, ((blend - 30.0) / max(1.0, th_val - 30.0)) * 100.0))
+    elif variable == "rainfall":
+        th_val = TH.get("heavy_rain_mm_24h", 64.5)
+        idx = timeline.index(target) if target in timeline else len(timeline) - 1
+        lo = max(0, idx - 23)
+        rain_24h = round(sum(
+            float(timeline[j]["blend"])
+            for j in range(lo, idx + 1)
+            if timeline[j].get("blend") is not None
+        ), 1)
+        hazard_proximity = max(0.0, min(100.0, (rain_24h / th_val) * 100.0))
+    elif variable == "wind_speed":
+        th_val = TH.get("wind_squall_kmh", 55.0)
+        if blend is not None:
+            hazard_proximity = max(0.0, min(100.0, (blend / th_val) * 100.0))
+    elif variable == "pressure":
+        if blend is not None:
+            hazard_proximity = max(0.0, min(100.0, (abs(1013.25 - blend) / 20.0) * 100.0))
+
+    risk_score = round(min(100.0, hazard_proximity * 0.5 + bust_prob_pct * 0.5))
+    if risk_score < 35:
+        severity = "LOW"
+    elif risk_score < 65:
+        severity = "MODERATE"
+    elif risk_score < 85:
+        severity = "HIGH"
+    else:
+        severity = "CRITICAL"
+
+    # Variable-specific structured reasoning
+    reasons: list[str] = []
+    if spread <= baseline_rmse * 0.8:
+        reasons.append(
+            f"Multi-model {var_label.lower()} spread is narrow ({spread:.1f} {unit} across 4 NWP centers), demonstrating high inter-model consensus."
+        )
+    elif spread <= baseline_rmse * 2.0:
+        reasons.append(
+            f"Multi-model {var_label.lower()} spread is moderate ({spread:.1f} {unit} across 4 NWP centers), reflecting normal atmospheric lead-time dispersion."
+        )
+    else:
+        reasons.append(
+            f"Multi-model {var_label.lower()} spread is elevated ({spread:.1f} {unit} across 4 NWP centers), indicating divergent synoptic solutions among NWP members."
+        )
+
+    if variable == "temperature":
+        if blend is not None and blend >= TH.get("heatwave_c", 45.0):
+            reasons.append(f"Current forecast temperature ({blend:.1f} °C) crosses the IMD Heatwave threshold (45.0 °C).")
+        else:
+            reasons.append(f"Current forecast ({blend:.1f} °C) remains well within the configured heatwave threshold (45.0 °C).")
+    elif variable == "rainfall":
+        if rain_24h >= TH.get("heavy_rain_mm_24h", 64.5):
+            reasons.append(f"24h accumulated rainfall ({rain_24h:.1f} mm) crosses the IMD Heavy Rain threshold (64.5 mm).")
+        else:
+            reasons.append(f"24h accumulated precipitation ({rain_24h:.1f} mm) is well below the configured heavy rain threshold (64.5 mm).")
+    elif variable == "wind_speed":
+        if blend is not None and blend >= TH.get("wind_squall_kmh", 55.0):
+            reasons.append(f"Forecast wind speed ({blend:.1f} km/h) exceeds the IMD Squally weather threshold (55.0 km/h).")
+        else:
+            reasons.append(f"Forecast sustained wind ({blend:.1f} km/h) is safely below the configured squall threshold (55.0 km/h).")
+    elif variable == "pressure":
+        reasons.append(f"Barometric pressure ({blend:.1f} hPa) indicates a stable regional synoptic pressure pattern.")
+
+    if is_adaptive and best_name:
+        reasons.append(
+            f"XGBoost adaptive meta-model active: lowest predicted error allocated to {best_name} ({best_weight}% weight)."
+        )
+    else:
+        reasons.append(
+            f"Operational equal-weight consensus (25% per member) maintained; adaptive ML candidate was not promoted for {var_label.lower()}."
+        )
+
+    # Variable-specific diagnostics
+    if variable == "temperature":
+        variable_features = {
+            "ensemble_spread": f"{spread:.2f} °C",
+            "predicted_error": best_err if is_adaptive else "N/A",
+            "heatwave_headroom": f"{max(0.0, 45.0 - (blend or 0.0)):.1f} °C margin",
+            "synoptic_regime": target.get("regime_index", "Standard"),
+        }
+    elif variable == "rainfall":
+        variable_features = {
+            "precipitation_spread": f"{spread:.2f} mm",
+            "accumulation_24h": f"{rain_24h:.1f} mm",
+            "heavy_rain_headroom": f"{max(0.0, 64.5 - rain_24h):.1f} mm margin",
+            "convective_regime": target.get("regime_index", "Standard"),
+        }
+    elif variable == "wind_speed":
+        variable_features = {
+            "wind_spread": f"{spread:.2f} km/h",
+            "max_member_wind": f"{max(vals):.1f} km/h" if vals else "N/A",
+            "squall_headroom": f"{max(0.0, 55.0 - (blend or 0.0)):.1f} km/h margin",
+            "surface_regime": target.get("regime_index", "Standard"),
+        }
+    elif variable == "pressure":
+        variable_features = {
+            "pressure_spread": f"{spread:.2f} hPa",
+            "departure_from_standard": f"{(blend - 1013.25) if blend is not None else 0.0:+.1f} hPa",
+            "predicted_error": best_err if is_adaptive else "N/A",
+            "synoptic_gradient": target.get("regime_index", "Standard"),
+        }
+    else:
+        variable_features = {"ensemble_spread": f"{spread:.2f} {unit}"}
+
+    # Formatted timeseries for Recharts
+    time_series = []
+    for pt in timeline:
+        m = pt.get("models", {})
+        time_series.append({
+            "time": pt.get("time"),
+            "lead_time_hours": pt.get("lead_time_hours"),
+            "IFS": m.get("ecmwf_ifs"),
+            "AIFS": m.get("ecmwf_aifs"),
+            "GFS": m.get("ncep_gfs"),
+            "ICON": m.get("dwd_icon"),
+            "VARUNA": pt.get("blend"),
+        })
+
+    # Horizon Trend across 5 standard leads
+    horizon_trend = []
+    for h in [24, 48, 72, 120, 168]:
+        h_target = min(timeline, key=lambda p: abs(p.get("lead_time_hours", 0) - h))
+        h_vals = [v for v in h_target.get("models", {}).values() if v is not None]
+        h_spread = round(max(h_vals) - min(h_vals), 2) if h_vals else 0.0
+        h_unc = max(0.05, math.sqrt(baseline_rmse**2 + (0.5 * h_spread)**2))
+        h_pbust = round(max(5.0, min(95.0, 200.0 * (1.0 - 0.5 * (1.0 + math.erf((tau_bust / h_unc) / math.sqrt(2.0)))))), 1)
+        h_conf = round(100.0 - h_pbust, 1)
+        horizon_trend.append({
+            "lead_time_hours": h,
+            "valid_time": h_target.get("time"),
+            "blend": h_target.get("blend"),
+            "spread": h_spread,
+            "confidence": h_conf,
+            "bust_probability": h_pbust,
+        })
 
     return {
         "region": region_id,
@@ -1033,6 +1202,14 @@ def analyze_payload(region_id: str, variable: str, lead_time_hours: int) -> dict
         "predicted_errors": predicted_errors,
         "blend": blend,
         "ensemble_spread": spread,
+        "risk_score": risk_score,
+        "confidence": confidence_pct,
+        "bust_probability": bust_prob_pct,
+        "severity": severity,
+        "reasons": reasons,
+        "variable_features": variable_features,
+        "time_series": time_series,
+        "horizon_trend": horizon_trend,
         "weighting_scheme": scheme,
         "weighting_reason": fc.get("weighting_reason"),
         "validated": fc.get("validated", False),

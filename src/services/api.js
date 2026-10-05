@@ -403,16 +403,16 @@ export function normalizeForecastResponse(raw, requestedLeadTime) {
           : (weighting_reason || 'Adaptive ML is not promoted for this variable; operational forecast uses equal-weight consensus across the four NWP members.')),
   };
 
-  // Recharts timeseries formatting
+  // Recharts timeseries formatting - preserve nulls for missing values rather than injecting fake numeric zeros
   const timeseries = timeline.map((pt) => ({
     time: formatChartTime(pt.time, pt.lead_time_hours),
     valid_time: pt.time,
     lead_time_hours: pt.lead_time_hours,
-    IFS: pt.models?.ecmwf_ifs ?? 0,
-    AIFS: pt.models?.ecmwf_aifs ?? 0,
-    GFS: pt.models?.ncep_gfs ?? 0,
-    ICON: pt.models?.dwd_icon ?? 0,
-    VARUNA: pt.blend ?? 0,
+    IFS: typeof pt.models?.ecmwf_ifs === 'number' ? pt.models.ecmwf_ifs : null,
+    AIFS: typeof pt.models?.ecmwf_aifs === 'number' ? pt.models.ecmwf_aifs : null,
+    GFS: typeof pt.models?.ncep_gfs === 'number' ? pt.models.ncep_gfs : null,
+    ICON: typeof pt.models?.dwd_icon === 'number' ? pt.models.dwd_icon : null,
+    VARUNA: typeof pt.blend === 'number' ? pt.blend : null,
     weights: pt.weights || {},
   }));
 
@@ -733,6 +733,52 @@ export async function fetchRegionalForecasts(arg1 = {}, arg2 = 'temperature', ar
           error: err.message || 'API unavailable',
         };
       }
+    }
+  });
+}
+
+/**
+ * Fetch operational extreme weather alerts for all configured regions.
+ * Pre-warms the server cache with client-side batch fetch to avoid rate limits,
+ * then queries /api/extremes for each region concurrently.
+ */
+export async function fetchRegionalExtremes({ regions = REGIONS, leadTime = '48h', simulate = false } = {}) {
+  const leadH = typeof leadTime === 'string'
+    ? (leadTime.endsWith('d') ? parseInt(leadTime, 10) * 24 : parseInt(leadTime, 10))
+    : (leadTime || 48);
+
+  // 1. Batch fetch from browser to warm client and server cache
+  try {
+    const seriesMap = await fetchOpenMeteoBatch(regions);
+    const batch = [];
+    for (const r of regions) {
+      if (seriesMap[r.id]) {
+        batch.push({
+          region: r.id,
+          variable: 'rainfall',
+          lead_time_hours: leadH,
+          series: seriesMap[r.id],
+        });
+      }
+    }
+    if (batch.length > 0) {
+      await fetch(`${getApiBase()}/api/forecast/process`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch }),
+      }).catch(() => {});
+    }
+  } catch (err) {
+    console.warn('Batch Open-Meteo pre-warm for extremes failed, using server fallback:', err);
+  }
+
+  // 2. Fetch /api/extremes for all regions concurrently
+  return runWithConcurrency(regions, 4, async (r) => {
+    try {
+      const data = await fetchExtremes({ region: r.id, leadTime, simulate });
+      return { region: r, data, error: null };
+    } catch (err) {
+      return { region: r, data: null, error: err.message || 'Request failed' };
     }
   });
 }

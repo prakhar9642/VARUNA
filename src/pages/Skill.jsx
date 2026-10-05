@@ -224,22 +224,34 @@ export default function Skill() {
       ) : (
         <>
           {/* Variable Validation Status Banner */}
-          <div className={`p-4 rounded-[var(--radius-lg)] border font-data flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+          <div className={`p-4 rounded-[var(--radius-lg)] border font-data flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs ${
             (selectedVariable === 'temperature' || selectedVariable === 'pressure')
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200'
-              : 'bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-200'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-950 dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-200'
+              : 'bg-amber-50 border-amber-300 text-amber-950 dark:bg-amber-950/40 dark:border-amber-800/60 dark:text-amber-200'
           }`}>
             <div className="flex items-start gap-2.5">
-              <span className="text-base font-bold mt-0.5">
+              <span className={`text-lg font-bold shrink-0 mt-0.5 ${
+                (selectedVariable === 'temperature' || selectedVariable === 'pressure')
+                  ? 'text-emerald-700 dark:text-emerald-400'
+                  : 'text-amber-700 dark:text-amber-400'
+              }`}>
                 {(selectedVariable === 'temperature' || selectedVariable === 'pressure') ? '✓' : '⚠'}
               </span>
               <div>
-                <div className="font-bold text-scale-sm">
+                <div className={`font-bold text-scale-sm ${
+                  (selectedVariable === 'temperature' || selectedVariable === 'pressure')
+                    ? 'text-emerald-950 dark:text-emerald-100'
+                    : 'text-amber-950 dark:text-amber-100'
+                }`}>
                   {(selectedVariable === 'temperature' || selectedVariable === 'pressure')
                     ? `${variable.label}: Validated vs Held-Out ERA5 Benchmark (Promoted to Adaptive XGBoost)`
                     : `${variable.label}: Held-Out Gate Not Passed (Operational Equal-Weight Consensus Maintained)`}
                 </div>
-                <div className="text-[12px] opacity-80 mt-0.5">
+                <div className={`text-[12px] font-sans font-medium mt-1 leading-relaxed ${
+                  (selectedVariable === 'temperature' || selectedVariable === 'pressure')
+                    ? 'text-emerald-900 dark:text-emerald-300'
+                    : 'text-amber-900 dark:text-amber-200'
+                }`}>
                   {selectedVariable === 'temperature' && 'Adaptive RMSE 0.78 °C (+29.4% improvement over best single NWP center, +18.7% over equal blend).'}
                   {selectedVariable === 'pressure' && 'Adaptive RMSE 0.67 hPa (+9.9% improvement over best single NWP center, +19.5% over equal blend).'}
                   {selectedVariable === 'wind_speed' && 'Adaptive RMSE 2.22 km/h underperforms equal blend (2.14 km/h) across all leads and on high-wind deciles. Retaining equal consensus.'}
@@ -247,7 +259,7 @@ export default function Skill() {
                 </div>
               </div>
             </div>
-            <span className={`text-[11px] font-bold px-2.5 py-1 rounded shrink-0 border ${
+            <span className={`text-[11px] font-bold px-2.5 py-1 rounded shrink-0 border shadow-xs ${
               (selectedVariable === 'temperature' || selectedVariable === 'pressure')
                 ? 'bg-emerald-600 text-white border-emerald-700'
                 : 'bg-amber-600 text-white border-amber-700'

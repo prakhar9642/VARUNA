@@ -8,6 +8,26 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import tempfile
+from app.providers.cache import ResponseCache
+import app.providers.cache as _cache_mod
+import app.providers.open_meteo as _om_mod
+
+_test_cache_dir = tempfile.TemporaryDirectory()
+_test_db = Path(_test_cache_dir.name) / "test_varuna_cache.sqlite3"
+_test_cache = ResponseCache(db_path=_test_db)
+_cache_mod.CACHE = _test_cache
+_om_mod.CACHE = _test_cache
+
+
+def pytest_unconfigure(config):
+    _test_cache.close()
+    try:
+        _test_cache_dir.cleanup()
+    except Exception:
+        pass
+
+
 from fastapi.testclient import TestClient
 
 from app.main import app
