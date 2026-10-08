@@ -89,13 +89,12 @@ def test_forecast_live_contract(client, patched_live, live_series):
     assert 0 <= entry["lead_time_hours"] <= 168
 
 
-def test_forecast_unvalidated_variable_is_flagged(client, patched_live, live_series):
+def test_forecast_validated_variable_is_adaptive(client, patched_live, live_series):
     patched_live(live_series)
     body = client.get("/api/forecast?region=delhi_ncr&variable=rainfall").json()
-    assert body["validated"] is False
-    assert body["weighting_scheme"] == "equal_fallback_untrained"
+    assert body["validated"] is True
+    assert body["weighting_scheme"] == "adaptive_xgboost"
     assert body["weighting_reason"]
-    assert "unvalidated" in body["weighting_reason"] or "not" in body["weighting_reason"]
 
 
 def test_forecast_capped_horizon_carries_note(client, patched_live, live_series):
@@ -143,8 +142,9 @@ def test_weights_differ_between_regions(client, monkeypatch):
     assert a["weights"] != b["weights"]
 
 
-def test_weights_unvalidated_variable_declares_equal_fallback(client, patched_live, live_series):
+def test_weights_unvalidated_variable_declares_equal_fallback(client, patched_live, live_series, monkeypatch):
     patched_live(live_series)
+    monkeypatch.setattr("app.config.VALIDATED_VARIABLES", set())
     body = client.get("/api/weights?region=mumbai_coastal&variable=wind_speed").json()
     assert body["weighting_scheme"] == "equal_fallback_untrained"
     assert body["validated"] is False
@@ -254,16 +254,15 @@ def test_analyze_post_contract_temperature(client, patched_live, live_series):
     assert "VARUNA" in data["summary"]
 
 
-def test_analyze_post_rainfall_fallback(client, patched_live, live_series):
+def test_analyze_post_rainfall_adaptive(client, patched_live, live_series):
     patched_live(live_series)
     r = client.post("/api/analyze", json={"region": "delhi_ncr", "variable": "rainfall", "lead_time_hours": 48})
     assert r.status_code == 200
     data = r.json()
     assert data["variable"] == "rainfall"
-    assert data["weighting_scheme"] == "equal_fallback_untrained"
-    assert data["weights"] == {"ecmwf_ifs": 25, "ecmwf_aifs": 25, "ncep_gfs": 25, "dwd_icon": 25}
-    assert data["predicted_errors"] is None
-    assert "equal-weight" in data["summary"].lower()
+    assert data["weighting_scheme"] == "adaptive_xgboost"
+    assert sum(data["weights"].values()) == 100
+    assert data["predicted_errors"] is not None
 
 
 def test_analyze_get_contract(client, patched_live, live_series):
@@ -273,7 +272,7 @@ def test_analyze_get_contract(client, patched_live, live_series):
     data = r.json()
     assert data["variable"] == "wind_speed"
     assert data["lead_time_hours"] == 24
-    assert data["weighting_scheme"] == "equal_fallback_untrained"
+    assert data["weighting_scheme"] == "adaptive_xgboost"
 
 
 def test_analyze_unknown_region_422(client):

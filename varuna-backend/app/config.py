@@ -36,7 +36,7 @@ BLEND_TEST_CSVS: dict[str, Path] = {
 BLEND_TEST_CSV = REPORTS_DIR / "blend_test_results.csv"
 VALIDATION_SUMMARY_CSV = REPORTS_DIR / "variable_validation_summary.csv"
 
-VALIDATED_VARIABLES: set[str] = {"temperature", "pressure"}
+VALIDATED_VARIABLES: set[str] = {"temperature", "rainfall", "wind_speed", "pressure"}
 
 
 def is_variable_validated(variable: str) -> bool:

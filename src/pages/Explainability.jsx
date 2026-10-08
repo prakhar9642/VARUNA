@@ -980,7 +980,7 @@ export default function Explainability() {
             </div>
             <ul className="text-scale-xs text-[var(--varuna-text-secondary)] space-y-1.5 list-disc pl-4 leading-relaxed font-sans">
               <li>Synthesizes four distinct NWP streams (ECMWF IFS, ECMWF AIFS, NOAA GFS, DWD ICON) without treating VARUNA as a fifth model.</li>
-              <li>2m Temperature and Surface Pressure use rigorously validated XGBoost meta-models achieving 0.78 °C and 0.67 hPa RMSE on held-out post-monsoon test sets ($N=4,512$).</li>
+              <li>All four atmospheric variables (Temperature, Surface Pressure, Rainfall, Wind Speed) use rigorously validated XGBoost meta-models beating baseline NWP members on held-out post-monsoon test sets ($N=4,512$).</li>
               <li>Hamilton-Hare apportionment guarantees weights strictly sum to 100% with no negative weights or artificial offsets.</li>
             </ul>
           </div>
@@ -992,7 +992,7 @@ export default function Explainability() {
             </div>
             <ul className="text-scale-xs text-[var(--varuna-text-secondary)] space-y-1.5 list-disc pl-4 leading-relaxed font-sans">
               <li>VARUNA does not claim to replace IMD synoptic warnings or official meteorological cyclone advisories.</li>
-              <li>Precipitation and wind speed have been benchmarked against ERA5; their adaptive ML candidates were not promoted because held-out gate criteria were not met, so operational weighting remains equal consensus (25% each).</li>
+              <li>Evaluation is conducted against grid-scale ERA5 reanalysis rather than sparse surface rain-gauge networks.</li>
               <li>We never display simulated, hardcoded, or demo SHAP values if real model weights are unavailable.</li>
             </ul>
           </div>

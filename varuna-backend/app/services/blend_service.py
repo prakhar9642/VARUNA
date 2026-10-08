@@ -765,16 +765,16 @@ def extremes_payload(region_id: str, lead_time_hours: int, simulate: bool = Fals
          TH["very_heavy_rain_mm_24h"] if very_heavy else TH["heavy_rain_mm_24h"],
          ("IMD Very Heavy Rain >= 115.6 mm/24h" if very_heavy
           else "IMD Heavy Rain >= 64.5 mm/24h"),
-         "very_heavy" if very_heavy else "heavy", False,
+         "very_heavy" if very_heavy else "heavy", is_variable_validated("rainfall"),
          rain24 >= TH["heavy_rain_mm_24h"])
     _add("heatwave", "Heatwave", round(temp_max, 1) if temp_max is not None else None,
          "\u00b0C", TH["heatwave_c"], "IMD Heatwave daily max >= 45.0 \u00b0C",
-         "heatwave", True,
+         "heatwave", is_variable_validated("temperature"),
          temp_max is not None and temp_max >= TH["heatwave_c"])
     _add("wind_squall", "Squally Winds", round(wind_max, 1) if wind_max is not None else None,
          "km/h", TH["wind_gale_kmh"] if gale else TH["wind_squall_kmh"],
          ("IMD Gale >= 62 km/h" if gale else "IMD Squally weather >= 55 km/h"),
-         "gale" if gale else "squall", False,
+         "gale" if gale else "squall", is_variable_validated("wind_speed"),
          wind_max is not None and wind_max >= TH["wind_squall_kmh"])
 
     data_mode = temps["data_mode"]

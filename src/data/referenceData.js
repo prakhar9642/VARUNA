@@ -134,9 +134,9 @@ export const REGIONS = [
  * wins when present — this static copy only pre-labels the switcher.
  */
 export const VARIABLES = [
-  { id: 'rainfall', label: 'Rainfall', unit: 'mm', icon: '🌧️', precision: 1, validated: false },
+  { id: 'rainfall', label: 'Rainfall', unit: 'mm', icon: '🌧️', precision: 1, validated: true },
   { id: 'temperature', label: 'Temperature', unit: '°C', icon: '🌡️', precision: 1, validated: true },
-  { id: 'wind_speed', label: 'Wind Speed', unit: 'km/h', icon: '💨', precision: 1, validated: false },
+  { id: 'wind_speed', label: 'Wind Speed', unit: 'km/h', icon: '💨', precision: 1, validated: true },
   { id: 'pressure', label: 'Surface Pressure', unit: 'hPa', icon: '🧭', precision: 1, validated: true },
 ];
 

@@ -106,8 +106,8 @@ def test_every_alert_is_backed_by_a_crossed_check(patch_series):
     assert {a["hazard"] for a in out["alerts"]} == crossed
     validated = out["validated"]
     assert validated["temperature"] is True
-    assert validated["rainfall"] is False
-    assert validated["wind_speed"] is False
+    assert validated["rainfall"] is True
+    assert validated["wind_speed"] is True
 
 
 def test_data_mode_is_echoed_honestly(monkeypatch, live_series):

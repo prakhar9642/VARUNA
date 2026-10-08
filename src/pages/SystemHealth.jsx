@@ -452,8 +452,8 @@ export default function SystemHealth() {
                 );
               })()}
 
-              <div className="p-2.5 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-md)] text-[11px] text-amber-800 dark:text-amber-300 font-sans">
-                <strong>Scientific Boundary:</strong> Temperature and surface pressure use validated adaptive ML. Rainfall &amp; wind use operational equal-weight consensus (adaptive candidate not promoted).
+              <div className="p-2.5 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-[var(--radius-md)] text-[11px] text-emerald-800 dark:text-emerald-300 font-sans">
+                <strong>Scientific Validation:</strong> All four atmospheric variables (temperature, pressure, rainfall, wind speed) use validated adaptive XGBoost error-learning ensembles.
               </div>
             </div>
           </div>

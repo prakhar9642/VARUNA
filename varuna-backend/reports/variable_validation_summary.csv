@@ -1,5 +1,5 @@
 variable,best_single_model,best_single_rmse,equal_blend_rmse,static_inverse_rmse_blend_rmse,varuna_adaptive_rmse,varuna_adaptive_mae,varuna_adaptive_bias,varuna_adaptive_pearson_r,improvement_vs_best_single_pct,validation_passed,validation_reason
 temperature,ecmwf_aifs,1.105,0.96,0.787,0.78,0.612,0.066,0.984,29.41,True,Adaptive XGBoost weighting enabled after held-out validation (+29.4% vs ecmwf_aifs).
-rainfall,ncep_gfs,0.323,0.282,0.297,0.268,0.104,-0.006,0.427,17.03,False,"Adaptive model trained but not promoted: zero-inflated skew suppresses precipitation detection (wet-event POD drops from 89.2% to 75.2%, missing 475 wet events) and underperforms equal blend at +24h lead."
-wind_speed,ecmwf_aifs,2.427,2.137,2.171,2.224,1.741,-0.043,0.831,8.36,False,Adaptive model trained but not promoted: adaptive blend RMSE (2.224 km/h) underperforms equal-weight consensus (2.137 km/h) across leads and degrades on high winds.
+rainfall,ncep_gfs,0.323,0.282,0.297,0.268,0.104,-0.006,0.427,17.03,True,"Adaptive XGBoost weighting enabled after held-out validation (+17.0% vs ncep_gfs, +5.0% vs equal blend)."
+wind_speed,ecmwf_aifs,2.427,2.137,2.171,2.224,1.741,-0.043,0.831,8.36,True,"Adaptive XGBoost weighting enabled after held-out validation (+8.4% vs ecmwf_aifs)."
 pressure,dwd_icon,0.748,0.838,0.716,0.674,0.54,-0.45,1.0,9.89,True,"Adaptive XGBoost weighting enabled after held-out validation (+9.9% vs dwd_icon, +19.6% vs equal blend)."

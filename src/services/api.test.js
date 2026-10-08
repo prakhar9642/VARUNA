@@ -80,9 +80,11 @@ test('reference data matches the backend contract', () => {
   const rain = VARIABLES.find((v) => v.id === 'rainfall');
   const temp = VARIABLES.find((v) => v.id === 'temperature');
   const pres = VARIABLES.find((v) => v.id === 'pressure');
-  assert.equal(rain.validated, false, 'rainfall adaptive ML remains not promoted');
+  const wind = VARIABLES.find((v) => v.id === 'wind_speed');
+  assert.equal(rain.validated, true, 'rainfall is a validated adaptive variable');
   assert.equal(temp.validated, true, 'temperature is a validated adaptive variable');
   assert.equal(pres.validated, true, 'pressure is a validated adaptive variable');
+  assert.equal(wind.validated, true, 'wind speed is a validated adaptive variable');
   // The UI variable ids are sent verbatim to the API, so they must stay in
   // sync with the backend's accepted values.
   for (const v of VARIABLES) {

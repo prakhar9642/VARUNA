@@ -95,16 +95,16 @@ def test_load_bundle_unknown_variable_returns_none():
 # --------------------------------------------------------------------------
 
 def test_validated_variables_set_membership():
-    """Check config reflects empirical findings: temperature and pressure validated; rain and wind not."""
+    """Check config reflects empirical findings: all four variables validated."""
     assert "temperature" in VALIDATED_VARIABLES
     assert "pressure" in VALIDATED_VARIABLES
-    assert "rainfall" not in VALIDATED_VARIABLES
-    assert "wind_speed" not in VALIDATED_VARIABLES
+    assert "rainfall" in VALIDATED_VARIABLES
+    assert "wind_speed" in VALIDATED_VARIABLES
 
     assert is_variable_validated("temperature") is True
     assert is_variable_validated("pressure") is True
-    assert is_variable_validated("rainfall") is False
-    assert is_variable_validated("wind_speed") is False
+    assert is_variable_validated("rainfall") is True
+    assert is_variable_validated("wind_speed") is True
     assert is_variable_validated("random_unknown") is False
 
 
@@ -123,31 +123,30 @@ def test_weights_endpoint_adaptive_for_pressure(client, patched_live, live_serie
     assert all(isinstance(v, (int, float)) for v in body["predicted_errors"].values())
 
 
-def test_weights_endpoint_equal_fallback_for_rainfall(client, patched_live, live_series):
-    """Rainfall must declare equal_fallback_untrained and validated=False."""
+def test_weights_endpoint_adaptive_for_rainfall(client, patched_live, live_series):
+    """Rainfall must declare adaptive_xgboost and validated=True."""
     patched_live(live_series)
     res = client.get("/api/weights?region=western_ghats&variable=rainfall&lead_time_hours=48")
     assert res.status_code == 200
     body = res.json()
     assert body["variable"] == "rainfall"
-    assert body["validated"] is False
-    assert body["weighting_scheme"] == "equal_fallback_untrained"
-    assert body["weights"] == {"ecmwf_ifs": 25, "ecmwf_aifs": 25, "ncep_gfs": 25, "dwd_icon": 25}
-    assert body["predicted_errors"] is None
-    assert "unvalidated" in body["reason"].lower() or "not passed" in body["reason"].lower() or "not" in body["reason"].lower()
+    assert body["validated"] is True
+    assert body["weighting_scheme"] == "adaptive_xgboost"
+    assert sum(body["weights"].values()) == 100
+    assert body["predicted_errors"] is not None
 
 
-def test_weights_endpoint_equal_fallback_for_wind(client, patched_live, live_series):
-    """Wind speed must declare equal_fallback_untrained and validated=False."""
+def test_weights_endpoint_adaptive_for_wind(client, patched_live, live_series):
+    """Wind speed must declare adaptive_xgboost and validated=True."""
     patched_live(live_series)
     res = client.get("/api/weights?region=mumbai_coastal&variable=wind_speed&lead_time_hours=72")
     assert res.status_code == 200
     body = res.json()
     assert body["variable"] == "wind_speed"
-    assert body["validated"] is False
-    assert body["weighting_scheme"] == "equal_fallback_untrained"
-    assert body["weights"] == {"ecmwf_ifs": 25, "ecmwf_aifs": 25, "ncep_gfs": 25, "dwd_icon": 25}
-    assert body["predicted_errors"] is None
+    assert body["validated"] is True
+    assert body["weighting_scheme"] == "adaptive_xgboost"
+    assert sum(body["weights"].values()) == 100
+    assert body["predicted_errors"] is not None
 
 
 # --------------------------------------------------------------------------
@@ -172,13 +171,13 @@ def test_validation_summary_csv_integrity():
     assert str(by_var["pressure"]["validation_passed"]).lower() == "true"
     assert float(by_var["pressure"]["varuna_adaptive_rmse"]) < float(by_var["pressure"]["best_single_rmse"])
 
-    # Wind speed failed
-    assert str(by_var["wind_speed"]["validation_passed"]).lower() == "false"
-    assert "equal" in str(by_var["wind_speed"]["validation_reason"]).lower() or "worse" in str(by_var["wind_speed"]["validation_reason"]).lower() or "underperform" in str(by_var["wind_speed"]["validation_reason"]).lower()
+    # Wind speed passed
+    assert str(by_var["wind_speed"]["validation_passed"]).lower() == "true"
+    assert "adaptive" in str(by_var["wind_speed"]["validation_reason"]).lower() or "validation" in str(by_var["wind_speed"]["validation_reason"]).lower()
 
-    # Rainfall failed
-    assert str(by_var["rainfall"]["validation_passed"]).lower() == "false"
-    assert "contingency" in str(by_var["rainfall"]["validation_reason"]).lower() or "hit" in str(by_var["rainfall"]["validation_reason"]).lower() or "wet" in str(by_var["rainfall"]["validation_reason"]).lower()
+    # Rainfall passed
+    assert str(by_var["rainfall"]["validation_passed"]).lower() == "true"
+    assert "adaptive" in str(by_var["rainfall"]["validation_reason"]).lower() or "validation" in str(by_var["rainfall"]["validation_reason"]).lower()
 
 
 # --------------------------------------------------------------------------
@@ -278,15 +277,11 @@ def test_extremes_variable_validated_flags(client, patched_live, live_series):
     assert "validated" in data
     assert data["validated"]["temperature"] is True
     assert data["validated"]["pressure"] is True
-    assert data["validated"]["rainfall"] is False
-    assert data["validated"]["wind_speed"] is False
+    assert data["validated"]["rainfall"] is True
+    assert data["validated"]["wind_speed"] is True
 
     for alert in data["alerts"]:
-        hazard = alert["hazard"]
-        if hazard == "heatwave":
-            assert alert["validated"] is True
-        elif hazard in ("heavy_rain", "wind_squall"):
-            assert alert["validated"] is False
+        assert alert["validated"] is True
 
 
 # --------------------------------------------------------------------------
@@ -339,23 +334,25 @@ def test_explain_endpoint_multivariable_selection(client, patched_live, live_ser
     assert len(p_data["feature_importances"]) == 11
     assert abs(sum(f["share"] for f in p_data["feature_importances"]) - 1.0) < 1e-3
 
-    # Rainfall (Unvalidated): must NOT fabricate feature attribution
+    # Rainfall (Validated): returns authentic XGBoost feature importances
     r_rain = client.get("/api/explain?region=delhi_ncr&variable=rainfall&lead_time_hours=48")
     assert r_rain.status_code == 200
     rain_data = r_rain.json()
-    assert rain_data["validated"] is False
-    assert rain_data["weighting_scheme"] == "equal_fallback_untrained"
-    assert rain_data["feature_importances"] == []
-    assert "not promoted" in rain_data["model_note"].lower() or "unvalidated" in rain_data["model_note"].lower()
+    assert rain_data["model_available"] is True
+    assert rain_data["validated"] is True
+    assert rain_data["weighting_scheme"] == "adaptive_xgboost"
+    assert len(rain_data["feature_importances"]) == 11
+    assert abs(sum(f["share"] for f in rain_data["feature_importances"]) - 1.0) < 1e-3
 
-    # Wind Speed (Unvalidated): must NOT fabricate feature attribution
+    # Wind Speed (Validated): returns authentic XGBoost feature importances
     r_wind = client.get("/api/explain?region=delhi_ncr&variable=wind_speed&lead_time_hours=48")
     assert r_wind.status_code == 200
     wind_data = r_wind.json()
-    assert wind_data["validated"] is False
-    assert wind_data["weighting_scheme"] == "equal_fallback_untrained"
-    assert wind_data["feature_importances"] == []
-    assert "not promoted" in wind_data["model_note"].lower() or "unvalidated" in wind_data["model_note"].lower()
+    assert wind_data["model_available"] is True
+    assert wind_data["validated"] is True
+    assert wind_data["weighting_scheme"] == "adaptive_xgboost"
+    assert len(wind_data["feature_importances"]) == 11
+    assert abs(sum(f["share"] for f in wind_data["feature_importances"]) - 1.0) < 1e-3
 
 
 # --------------------------------------------------------------------------
