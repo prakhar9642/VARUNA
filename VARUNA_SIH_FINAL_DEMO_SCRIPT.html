@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VARUNA — SIH Final Demo Script & Recording Choreography</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 12mm 14mm;
+    @bottom-right {
+      content: counter(page);
+      font-size: 8.5pt;
+      color: #64748b;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.4;
+    font-size: 9.5pt;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .header {
+    border-bottom: 2.5px solid #2563eb;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .title-group h1 {
+    font-size: 17pt;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 3px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .title-group .subtitle {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #2563eb;
+    margin: 0;
+  }
+
+  .meta-badges {
+    text-align: right;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 8.5pt;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 7.5pt;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .badge-primary { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .badge-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .badge-neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+  h2 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-left: 3.5px solid #2563eb;
+    padding-left: 8px;
+    margin: 14px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  h3 {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 10px 0 4px 0;
+  }
+
+  p { margin: 0 0 6px 0; }
+
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 9px 11px;
+    margin-bottom: 10px;
+  }
+
+  .concept-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 9.5pt;
+    color: #166534;
+    margin-bottom: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin: 8px 0 12px 0;
+  }
+
+  tr { page-break-inside: avoid; }
+
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 6px 7px;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  td {
+    padding: 5px 7px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .speech-block {
+    background: #f8fafc;
+    border-left: 3px solid #3b82f6;
+    padding: 6px 10px;
+    margin: 4px 0 8px 0;
+    font-style: italic;
+    color: #1e293b;
+    font-size: 9pt;
+    line-height: 1.35;
+  }
+
+  .timestamp-tag {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 700;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 8pt;
+    display: inline-block;
+    margin-bottom: 2px;
+  }
+
+  .step-list {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 8.5pt;
+  }
+
+  .step-list li {
+    margin-bottom: 3px;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .grid-2 {
+    display: flex;
+    gap: 10px;
+  }
+
+  .grid-2 > div {
+    flex: 1;
+  }
+
+  .footer-note {
+    font-size: 7.5pt;
+    color: #64748b;
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 6px;
+    margin-top: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="title-group">
+    <h1>VARUNA · SIH FINAL DEMO SCRIPT</h1>
+    <div class="subtitle">Smart India Hackathon 2026 (SIH26081) · Operational Video Recording Plan</div>
+  </div>
+  <div class="meta-badges">
+    <span class="badge badge-success">LIVE OPERATIONAL STREAM</span><br>
+    <span class="badge badge-primary" style="margin-top:3px;">TARGET: 2:42 (MAX 3:00)</span>
+  </div>
+</div>
+
+<!-- SECTION A -->
+<h2>A. Final Demo Concept</h2>
+<div class="concept-box">
+  <strong>Core Product Proposition:</strong> Numerical Weather Prediction models (ECMWF IFS, AIFS, NOAA GFS, DWD ICON) do not perform equally across India's microclimates and forecast horizons. <strong>VARUNA</strong> serves as a real-time meteorological intelligence layer: acquiring live multi-center NWP streams, predicting model-specific error using validated XGBoost meta-models, and computing an adaptive, mathematically apportioned consensus forecast with full explainability and continuous hazard surveillance.
+</div>
+
+<!-- SECTION B -->
+<h2>B. Master Timestamped Recording Script (Target: 2:42)</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 70px;">Time</th>
+      <th style="width: 110px;">Workspace</th>
+      <th style="width: 140px;">Screen Action</th>
+      <th style="width: 170px;">Mouse & Hover Targets</th>
+      <th>Spoken Narration (Summary)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="font-mono"><strong>00:00–00:14</strong><br>(14s)</td>
+      <td><strong>Landing Hero</strong><br>(<code>/</code>)</td>
+      <td>Centerpiece hero: title, problem tagline, 12 India station markers</td>
+      <td>Hover title <code>VARUNA</code>; rest cursor stationary beside subtitle.</td>
+      <td><em>"Hello everyone, we present Project VARUNA. NWP models like ECMWF and NOAA GFS frequently disagree across India’s microclimates. Relying on any single model introduces dangerous bias. Here, we present VARUNA — an operational multi-model intelligence layer."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>00:14–00:36</strong><br>(22s)</td>
+      <td><strong>Landing Editorial</strong><br>(<code>/</code>)</td>
+      <td>Smooth scroll through Sections 02–07: Problem, Blending, 5-stage pipeline, Simulator, Scope</td>
+      <td>Steady scroll downward; pause briefly on the interactive Hamilton–Hare apportionment simulator; click <code>Launch Command Centre →</code>.</td>
+      <td><em>"Scrolling down, VARUNA explains why models diverge, how our five-stage pipeline predicts member error rather than assuming equal trust, and simulates dynamic Hamilton–Hare apportionment across twelve canonical climate zones across India."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>00:36–01:04</strong><br>(28s)</td>
+      <td><strong>Command Centre</strong><br>(<code>/command-centre</code>)</td>
+      <td>Interactive India Map, 12 monitoring stations, lead switcher</td>
+      <td>Hover Mumbai Coastal marker (19.0760°N, 72.8777°E); hover <code>LIVE OPERATIONAL STREAM</code> badge; click <code>+72h</code> pill; click <code>Forecast</code> tab.</td>
+      <td><em>"This is the Command Centre — our operational control surface. Twelve canonical stations stream live predictions. Notice the live operational badge. Operators can toggle forecast leads seamlessly: switching from 48 hours to 72 hours dynamically synchronizes the national mesh."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>01:04–01:28</strong><br>(24s)</td>
+      <td><strong>Forecast Workspace</strong><br>(<code>/forecast</code>)</td>
+      <td>4-member NWP comparison, blend card, 7-day timeseries</td>
+      <td>Hover VARUNA Blend card (29.3 °C); hover weights (AIFS 51%, IFS 32%, GFS 4%); hover 7-day timeline graph.</td>
+      <td><em>"In the Forecast workspace, the four NWP centers are evaluated side-by-side. For Mumbai Coastal at 48 hours, ECMWF AIFS and IFS demonstrate lowest error, while NOAA GFS is down-weighted to 4%. VARUNA combines their telemetry into a calibrated blend of 29.3 degrees Celsius."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>01:28–01:48</strong><br>(20s)</td>
+      <td><strong>Surveillance Workspace</strong><br>(<code>/extremes</code>)</td>
+      <td>Configured hazard threshold cards, Event Log audit stream</td>
+      <td>Hover <code>Configured Hazard Threshold</code>; scroll down to Event Log; hover <code>LIVE 200 OK</code>; click <code>Mumbai Coastal ↗</code> in Quick Launcher.</td>
+      <td><em>"The Extreme Weather Surveillance workspace monitors configurable hazard thresholds for heatwaves, intense rain, and coastal squalls. Below, the live Surveillance Event Log records real-time ingestion passes and nominal audit records across all twelve monitoring zones."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>01:48–02:12</strong><br>(24s)</td>
+      <td><strong>Regional Drawer</strong><br>(Modal)</td>
+      <td>Sliding Regional Surveillance & Forecast Reliability Drawer</td>
+      <td>Hover Risk Score (15/100), Bust Probability (15%); trace timeseries to vertical <code>Selected +48h</code> line; click <code>Rainfall</code> tab; close drawer.</td>
+      <td><em>"Clicking any monitored region launches the Regional Surveillance and Reliability drill-down. Here we see a complete 169-point multi-NWP timeseries, risk score, and bust probability. Switching to Rainfall dynamically adapts the evidence base to equal-weight consensus."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>02:12–02:30</strong><br>(18s)</td>
+      <td><strong>Explainability</strong><br>(<code>/explainability</code>)</td>
+      <td>NWP Member Comparison bars & Operational Weight Allocation</td>
+      <td>Hover comparison bars with explicit <code>0.0 mm</code> labels; hover <code>25% Equal Baseline</code> reference line on weight distribution.</td>
+      <td><em>"In Explainability, VARUNA opens the black box. The operator inspects exactly why weights were assigned, comparing member predictions against the consensus blend, backed by empirical error predictions and regime classification."</em></td>
+    </tr>
+    <tr>
+      <td class="font-mono"><strong>02:30–02:42</strong><br>(12s)</td>
+      <td><strong>Pipeline Health / Map</strong><br>(<code>/system</code> → <code>/command-centre</code>)</td>
+      <td>Gateway health metrics, returning to national map view</td>
+      <td>Hover Open-Meteo Gateway Status (200 OK); navigate to <code>Command Centre</code>; park cursor cleanly in bottom-left corner.</td>
+      <td><em>"System Health verifies our multi-coordinate gateway pipeline with zero mock fallbacks. Four forecast systems, one transparent intelligence layer — VARUNA. Thank you."</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- SECTION C -->
+<h2>C. Exact Spoken Narration Script</h2>
+<div class="card">
+  <p style="font-size: 8.5pt; color: #64748b; margin-bottom: 6px;">
+    <strong>Delivery Cadence:</strong> Speak at an even, authoritative presentation pace (~135 words/minute). Do not rush.
+  </p>
+
+  <span class="timestamp-tag">[00:00 – 00:14] Hook & Problem Statement</span>
+  <div class="speech-block">
+    "Hello everyone, we present Project VARUNA. Numerical weather prediction models like ECMWF IFS, AIFS, NOAA GFS, and DWD ICON frequently disagree across India’s complex geography. Relying on any single model introduces dangerous forecast bias. Here, we present VARUNA — an operational multi-model weather intelligence layer."
+  </div>
+
+  <span class="timestamp-tag">[00:14 – 00:36] Architecture & Editorial Tour</span>
+  <div class="speech-block">
+    "Scrolling down our architecture overview, VARUNA explains why models diverge, how our five-stage pipeline predicts member error rather than assuming equal trust, and simulates dynamic Hamilton–Hare apportionment across twelve canonical climate zones across India."
+  </div>
+
+  <span class="timestamp-tag">[00:36 – 01:04] Command Centre & Map Controls</span>
+  <div class="speech-block">
+    "This is the Command Centre — our operational control surface. Twelve canonical monitoring stations stream live multi-model predictions. Notice the live operational badge. Operators can toggle forecast leads seamlessly: switching from 48 hours to 72 hours dynamically synchronizes the national mesh."
+  </div>
+
+  <span class="timestamp-tag">[01:04 – 01:28] NWP Member Comparison & Blend</span>
+  <div class="speech-block">
+    "In the Forecast workspace, the four NWP centers are evaluated side-by-side. For Mumbai Coastal at 48 hours, ECMWF AIFS and IFS demonstrate the lowest error, while NOAA GFS is down-weighted to 4%. VARUNA combines their telemetry into a calibrated operational blend of 29.3 degrees Celsius, projected across a full seven-day horizon."
+  </div>
+
+  <span class="timestamp-tag">[01:28 – 01:48] Extreme Weather Surveillance & Event Log</span>
+  <div class="speech-block">
+    "The Extreme Weather Surveillance workspace monitors configurable hazard thresholds for heatwaves, intense rain, and coastal squalls. Below, the live Surveillance Event Log records real-time ingestion passes and nominal audit records across all twelve monitoring zones."
+  </div>
+
+  <span class="timestamp-tag">[01:48 – 02:12] Regional Surveillance & Reliability Drill-Down</span>
+  <div class="speech-block">
+    "Clicking any monitored region launches the Regional Surveillance and Reliability drill-down. Here we see a complete 169-point multi-NWP timeseries, ensemble spread, risk score, and bust probability. Switching to Rainfall dynamically adapts the evidence base to equal-weight consensus with zero-accumulation verification."
+  </div>
+
+  <span class="timestamp-tag">[02:12 – 02:30] Explainability & Transparent Meta-Model</span>
+  <div class="speech-block">
+    "In Explainability, VARUNA opens the black box. The operator inspects exactly why weights were assigned, comparing member predictions against the consensus blend, backed by empirical error predictions and regime classification."
+  </div>
+
+  <span class="timestamp-tag">[02:30 – 02:42] Pipeline Telemetry & Confident Closing</span>
+  <div class="speech-block">
+    "System Health verifies our multi-coordinate gateway pipeline with zero mock fallbacks. Four forecast systems, one transparent intelligence layer — VARUNA. Thank you."
+  </div>
+</div>
+
+<!-- SECTION D & E IN 2 COLUMNS -->
+<div class="grid-2">
+  <div>
+    <h2>D. Mouse & Click Choreography</h2>
+    <div class="card">
+      <ol class="step-list">
+        <li><strong>0:00–0:12:</strong> Cursor rests still next to <code>VARUNA</code> heading.</li>
+        <li><strong>0:14–0:30:</strong> Smooth mouse scroll down through sections 02, 03, 04, 05.</li>
+        <li><strong>0:32:</strong> Click <code>Launch Command Centre →</code>.</li>
+        <li><strong>0:38:</strong> Hover Mumbai Coastal marker (1.5s tooltip readout).</li>
+        <li><strong>0:48:</strong> Move to top right; click <code>+72h</code> lead pill.</li>
+        <li><strong>0:56:</strong> In navigation bar, click <code>Forecast</code>.</li>
+        <li><strong>1:05:</strong> Hover <code>VARUNA BLEND</code> card (29.3 °C).</li>
+        <li><strong>1:12:</strong> Hover AIFS (51%), IFS (32%), GFS (4%) weights.</li>
+        <li><strong>1:26:</strong> In navigation, click <code>Extremes</code>.</li>
+        <li><strong>1:32:</strong> Hover <code>Configured Hazard Threshold</code> badge.</li>
+        <li><strong>1:40:</strong> Scroll to Event Log; hover <code>LIVE 200 OK</code>.</li>
+        <li><strong>1:46:</strong> Click <code>Mumbai Coastal ↗</code> in Quick Launcher.</li>
+        <li><strong>1:50:</strong> Hover Risk Score (15/100) and Bust Prob (15%).</li>
+        <li><strong>1:58:</strong> Trace timeseries to vertical <code>Selected +48h</code> line.</li>
+        <li><strong>2:04:</strong> Click <code>Rainfall</code> tab in drawer; hover 0.0 mm badge.</li>
+        <li><strong>2:10:</strong> Click close button <code>(✕)</code> on drawer.</li>
+        <li><strong>2:14:</strong> Click <code>Explainability</code> tab in navigation.</li>
+        <li><strong>2:18:</strong> Hover NWP Comparison bar chart & 0.0 mm labels.</li>
+        <li><strong>2:24:</strong> Hover Operational Weight Allocation chart.</li>
+        <li><strong>2:30:</strong> Click <code>System Health</code>; hover Gateway 200 OK.</li>
+        <li><strong>2:38:</strong> Click <code>Command Centre</code>; park cursor bottom-left.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div>
+    <h2>E. Pre-Recording Checklist</h2>
+    <div class="card">
+      <ul class="step-list" style="list-style: none; padding-left: 0;">
+        <li>☑ <strong>FastAPI Active:</strong> <code>http://127.0.0.1:8000/api/providers/status</code> (200 OK)</li>
+        <li>☑ <strong>Vite Active:</strong> <code>http://localhost:5173/</code> (200 OK)</li>
+        <li>☑ <strong>Display Resolution:</strong> Maximize window at <strong>1920 × 1080</strong> (100% zoom).</li>
+        <li>☑ <strong>Clean Browser:</strong> F11 fullscreen; bookmarks & DevTools hidden.</li>
+        <li>☑ <strong>OS Notifications:</strong> Enable Windows Focus Assist (Do Not Disturb).</li>
+        <li>☑ <strong>Audio Setup:</strong> Calibrated microphone; silent room.</li>
+        <li>☑ <strong>Dry Run:</strong> Complete 1 stopwatch dry run to verify ~2:40 timing.</li>
+      </ul>
+
+      <h3 style="margin-top: 10px;">F. Operational Backup Plan</h3>
+      <p style="font-size: 8pt;">
+        <strong>Primary Backup Region:</strong> <em>Delhi NCR</em> (exhibits high model spread of 6.7 °C between IFS and GFS, clearly showing NWP divergence).<br>
+        <strong>Offline Resiliency:</strong> SQLite response cache (<code>varuna_cache.sqlite3</code>) guarantees instantaneous &lt;10ms playback for all 12 stations even if the external network is severed.
+      </p>
+
+      <h3 style="margin-top: 10px;">G. Forensic Verification Matrix</h3>
+      <p style="font-size: 8pt;">
+        • <strong>Forecast Blend:</strong> 29.3 °C (Mumbai +48h, AIFS: 51%, IFS: 32%)<br>
+        • <strong>Surveillance:</strong> 12/12 stations verified, 169-pt timeseries active<br>
+        • <strong>Explainability:</strong> Baseline pills + 0.0 mm labels active for dry states<br>
+        • <strong>Quality Gates:</strong> <code>npm run lint</code> (0 err), <code>pytest</code> (184/184 pass)
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  VARUNA · OPERATIONAL WEATHER INTELLIGENCE FOR INDIA · SMART INDIA HACKATHON 2026 (SIH26081)
+</div>
+
+</body>
+</html>

@@ -3,14 +3,22 @@
 
 [![Live Frontend](https://img.shields.io/badge/Production%20Frontend-Vercel-blue?style=flat-square&logo=vercel)](https://varuna-rose.vercel.app)
 [![Production Backend](https://img.shields.io/badge/Production%20API-Render-46E3B7?style=flat-square&logo=render)](https://varuna-backend-grfc.onrender.com/api/health)
+[![SIH Demo Script](https://img.shields.io/badge/SIH%20Demo%20Script-PDF%20Ready-blueviolet?style=flat-square&logo=adobeacrobatreader)](VARUNA_SIH_FINAL_DEMO_SCRIPT.pdf)
 [![Scientific Audit Tests](https://img.shields.io/badge/Scientific%20Tests-10%2F10%20Passed-emerald?style=flat-square)](src/ml/scientific_audit.test.js)
 [![Backend Tests](https://img.shields.io/badge/Backend%20Pytest-184%20Passed-emerald?style=flat-square)](varuna-backend/tests)
+[![ESLint](https://img.shields.io/badge/ESLint-Clean%20(0%20warnings)-brightgreen?style=flat-square&logo=eslint)](package.json)
 [![License](https://img.shields.io/badge/License-MIT-gray?style=flat-square)](LICENSE)
 
 > **Live Deployments:**  
 > **Frontend:** [https://varuna-rose.vercel.app](https://varuna-rose.vercel.app)  
 > **Backend API:** [https://varuna-backend-grfc.onrender.com](https://varuna-backend-grfc.onrender.com)  
-> **API Health:** [https://varuna-backend-grfc.onrender.com/api/health](https://varuna-backend-grfc.onrender.com/api/health)
+> **API Health:** [https://varuna-backend-grfc.onrender.com/api/health](https://varuna-backend-grfc.onrender.com/api/health)  
+>  
+> **SIH 2026 Presentation Resources:**  
+> • **Official Demo Script & Recording Choreography (PDF):** [`VARUNA_SIH_FINAL_DEMO_SCRIPT.pdf`](VARUNA_SIH_FINAL_DEMO_SCRIPT.pdf) *(Under-3-minute timestamped recording guide & narration)*  
+> • **Interactive HTML Presentation Companion:** [`VARUNA_SIH_FINAL_DEMO_SCRIPT.html`](VARUNA_SIH_FINAL_DEMO_SCRIPT.html)  
+> • **Multi-Variable Validation Report:** [`varuna-backend/reports/MULTIVARIABLE_VALIDATION_REPORT.md`](varuna-backend/reports/MULTIVARIABLE_VALIDATION_REPORT.md)  
+> • **Empirical Validation Protocol:** [`varuna-backend/docs/VALIDATION_PROTOCOL.md`](varuna-backend/docs/VALIDATION_PROTOCOL.md)
 
 ---
 
@@ -213,11 +221,14 @@ The user interface follows a structured three-tier architecture:
 
 ### B. Analysis
 * **Verification Skill (`/skill`):** Empirical statistical evaluation against the ERA5 reference reanalysis dataset across lead times (24h to 120h), 4 meteorological seasons, and 6 synoptic regimes.
-* **Extremes Watch (`/extremes`):** Automated surveillance monitoring blended forecasts against statutory IMD extreme thresholds.
-* **Explainability (`/explainability`):** WHAT $\to$ WHY $\to$ DETAIL audit trail showing multi-model disagreement, dynamic decision evidence (predicted errors vs assigned weights), and global XGBoost feature gain shares.
+* **Extremes Surveillance & Regional Reliability (`/extremes`):** Automated surveillance monitoring blended forecasts against configured hazard thresholds. Features:
+  * **Surveillance Event Log & Operational Audit Stream:** Real-time multi-model ingestion telemetry, threshold scan passes across all 12 zones, and advisory records with interactive quick launcher buttons (`⚡ Quick Region Surveillance Drill-Down`).
+  * **Regional Surveillance & Forecast Reliability Drawer:** Interactive modal drill-down across $\text{REGION} \times \text{VARIABLE} \times \text{LEAD} \times \text{RELIABILITY}$, rendering a 169-point multi-NWP timeseries (0h to 168h), real-time ensemble spread badge, lead reference line, Risk Index (0–100), Bust Probability ($P(\text{error} > \tau)$), 4-member NWP telemetry table, and 5-lead horizon degradation trend.
+  * **OASIS CAP v1.2 Research Advisory Modal:** Generates structured XML/JSON bulletins for disaster management interop.
+* **Explainability (`/explainability`):** WHAT $\to$ WHY $\to$ DETAIL audit trail showing multi-model disagreement, dynamic decision evidence (predicted errors vs assigned weights), and global XGBoost feature gain shares. Features enhanced NWP Member Comparison bar chart with `minPointSize={6}` baseline indicators and explicit `<LabelList>` formatting (e.g. `0.0 mm` on dry days) ensuring unanimous consensus is visually distinct from missing data.
 
 ### C. System
-* **System Health (`/system-health`):** Multi-provider upstream connectivity monitors, latency gauges, SQLite cache status, fallback resilience diagnostics, and system audit trail.
+* **System Health (`/system`):** Multi-provider upstream connectivity monitors, latency gauges, SQLite cache status, fallback resilience diagnostics, and system audit trail.
 
 ---
 
@@ -240,9 +251,9 @@ $$\begin{aligned}
 
 ## 9. Extreme Weather Surveillance
 
-VARUNA monitors blended forecasts against IMD statutory thresholds:
+VARUNA monitors blended forecasts against configured operational hazard thresholds:
 
-| Extreme Hazard | IMD Warning Threshold | Unit | Evaluated Scope | Evaluation Method |
+| Extreme Hazard | Configured Hazard Threshold | Unit | Evaluated Scope | Evaluation Method |
 | :--- | :--- | :--- | :--- | :--- |
 | **Heavy Rainfall** | $\ge 64.5$ | mm / 24h | Blended Rainfall | 24-hour rolling accumulation |
 | **Very Heavy Rainfall** | $\ge 115.6$ | mm / 24h | Blended Rainfall | 24-hour rolling accumulation |
@@ -250,7 +261,7 @@ VARUNA monitors blended forecasts against IMD statutory thresholds:
 | **Squally Wind** | $\ge 55.0$ | km/h | Blended Wind Speed | Instantaneous 10m wind speed |
 | **Gale Wind Alert** | $\ge 62.0$ | km/h | Blended Wind Speed | Instantaneous 10m wind speed |
 
-> **Important Advisory Note:** An alert indicates that the *evaluated blended forecast crossed a statutory threshold*. A "no active alert" status means the blended forecast did not exceed threshold criteria; it does not guarantee the absence of localized microscale severe weather. Rainfall and wind alerts operate on unvalidated consensus.
+> **Important Advisory Note:** An alert indicates that the *evaluated blended forecast crossed a configured hazard threshold*. A "no active alert" status means the blended forecast did not exceed threshold criteria; it does not guarantee the absence of localized microscale severe weather. Rainfall and wind alerts operate on unvalidated consensus.
 
 ---
 
@@ -348,9 +359,15 @@ npm run dev
 ## 13. Test Suites & Verification
 
 ### Frontend Scientific Audit Suite
-Runs 8 automated tests validating mathematical verification formulas, Hamilton–Hare normalization, non-negativity across 192 parameter combinations, schema conformance, and physical boundary clamping:
+Runs 10 automated tests validating statistical verification engine formulas, boundary & zero-length handling, Hamilton–Hare normalization, non-negativity across 192 parameter combinations, largest remainder edge cases, provider contracts, physical boundary clamping, system feed truthfulness, live regional matrix integrity, and missing lead/fallback resilience:
 ```powershell
 npm test
+```
+
+### Frontend Linter
+Validates React syntax, Hook dependency rules, and coding conventions via ESLint 9:
+```powershell
+npm run lint
 ```
 
 ### Production Build Verification
@@ -383,6 +400,7 @@ prakhar9642/VARUNA/
 │   ├── components/
 │   │   ├── layout/                    # TopBar, NavDrawer, Footer, AppLayout
 │   │   ├── map/                       # MapLibre GL MapCore, ForecastLayer, MapControls
+│   │   ├── modals/                    # RegionalSurveillanceDrawer, CAPBulletinModal
 │   │   └── shared/                    # ChartCard, ForecastDetailDrawer, Badges
 │   ├── data/                          # Canonical metadata, scientific reports, reference data
 │   ├── ml/                            # Verification math and scientific audit test suite
@@ -403,6 +421,8 @@ prakhar9642/VARUNA/
 │   ├── reports/                       # Multi-variable verification CSV reports, summary, and markdown reports
 │   └── tests/                         # 184 network-free pytest tests
 ├── docs/                              # Architectural documentation and UI audit reports
+├── VARUNA_SIH_FINAL_DEMO_SCRIPT.pdf   # Publication-ready executive demo & presentation guide
+├── VARUNA_SIH_FINAL_DEMO_SCRIPT.html  # Interactive presentation script companion
 ├── verify_production_e2e.mjs          # Authoritative production E2E acceptance script
 ├── vercel.json                        # Vercel deployment routing configuration
 ├── package.json                       # Frontend dependencies and test scripts
