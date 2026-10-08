@@ -168,12 +168,12 @@ $$\hat{y}_{\text{VARUNA}} = \sum_{m=1}^4 \left(\frac{w_m}{100}\right) y_m$$
 
 To maintain strict scientific integrity, VARUNA distinguishes between validated capabilities and operational baselines:
 
-| Atmospheric Variable | Operational Stream | Weighting Scheme | Validation Status | Benchmark Reference |
-| :--- | :--- | :--- | :--- | :--- |
-| **2m Temperature** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.780^\circ\text{C}$ RMSE, $+29.4\%$ vs best NWP) |
-| **Surface Pressure** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.674\text{ hPa}$ RMSE, $+9.9\%$ vs best NWP) |
-| **10m Wind Speed** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated (Gate Failed)** | Held-Out ERA5 ($N=4,512$, $2.137\text{ km/h}$ RMSE; adaptive underperformed equal blend) |
-| **Rainfall (Precipitation)** | Live Operational | **Equal Consensus (25% each)** | **Unvalidated (Gate Failed)** | Held-Out ERA5 ($N=4,512$, $0.282\text{ mm}$ RMSE; wet-event hit rate dropped 89.2% → 75.2%) |
+| Atmospheric Variable | Operational Stream | Weighting Scheme | Validation Status | Empirical Benchmark Reference | Scientific Resolution Rationale |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **2m Temperature** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.780^\circ\text{C}$ RMSE) | **+29.4% RMSE reduction** vs best NWP center (ECMWF AIFS $1.105^\circ\text{C}$); +18.7% vs equal blend ($0.960^\circ\text{C}$). Promoted to adaptive production weighting. |
+| **Surface Pressure** | Live Operational | **Adaptive XGBoost** | **Validated** | Held-Out ERA5 ($N=4,512$, $0.674\text{ hPa}$ RMSE) | **+9.9% RMSE reduction** vs best NWP center (DWD ICON $0.748\text{ hPa}$); +19.5% vs equal blend ($0.838\text{ hPa}$); Pearson $r = 1.000$. Promoted to adaptive production weighting. |
+| **Rainfall (Precipitation)** | Live Operational | **Equal Consensus (25% each)** | **Consensus Maintained** | Held-Out ERA5 ($N=4,512$, $0.282\text{ mm}$ RMSE) | **Empirical Gate Triggered:** While continuous XGBoost penalized false alarms on dry hours (57.5% zero-inflation), wet-event Probability of Detection (POD) plummeted from **89.2% (equal blend) to 75.2% (adaptive)**, missing 475 actual rain events. Operational equal consensus retained to prevent flood/hazard false negatives. |
+| **10m Wind Speed** | Live Operational | **Equal Consensus (25% each)** | **Consensus Maintained** | Held-Out ERA5 ($N=4,512$, $2.137\text{ km/h}$ RMSE) | **Empirical Gate Triggered:** Adaptive blend ($2.224\text{ km/h}$) underperformed equal consensus ($2.137\text{ km/h}$) across all operational leads (+24h to +120h) and degraded significantly on high-wind cases ($\ge 15.9\text{ km/h}$, 3.09 vs 2.49 km/h). Equal consensus retained as the statistically superior operational blend. |
 
 ### Boundaries & Commitments:
 - **Truthful Validation Gating:** Adaptive XGBoost weighting is strictly activated for validated variables (**Temperature** and **Surface Pressure**), which empirically beat all single NWPs and baseline consensus on held-out test data. **Rainfall** and **Wind Speed** meta-models were fully trained and evaluated, but failed held-out promotion gates and remain strictly on operational equal-weight consensus.
