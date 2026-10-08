@@ -971,7 +971,7 @@ export default function Explainability() {
           </p>
         </div>
 
-        {/* Nirikshan-Inspired "What VARUNA Claims & What It Does Not Claim" Boundary Box */}
+        {/* VARUNA Operational Scope & Integrity Boundary Box */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-[var(--varuna-surface)] border border-[var(--varuna-border)] rounded-[var(--radius-lg)] shadow-2xs space-y-2">
             <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-scale-xs font-data">

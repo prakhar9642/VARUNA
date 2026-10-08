@@ -34,7 +34,7 @@ Successfully reconciled the diverged Git branches between `origin/main` (42 comm
    - Merged `origin/main` into `integration/real-science-ui` (`git merge origin/main --no-commit`).
    - Resolved merge conflicts:
      - App & Science: Authoritative `integration/real-science-ui` preserved for `src/`, `varuna-backend/`, `package.json`, `package-lock.json`, `vercel.json`, `README.md`, `verify_production_e2e.mjs`.
-     - Main History: Preserved all 88 files in `ml/` (Nirikshan ML pipeline for bust prediction) from `main`.
+     - Main History: Preserved all 88 files in `ml/` (VARUNA Baseline ML pipeline for bust prediction) from `main`.
      - `.gitignore`: Combined Python cache and editor ignore patterns from both branches.
    - Validated complete test gate (8/8 frontend tests, Vite build, 165/165 backend pytest tests).
    - Committed merge: `1f4efd0` (*Merge main into integration/real-science-ui*) and pushed to origin.

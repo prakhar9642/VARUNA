@@ -2,10 +2,12 @@
 
 import pytest
 from fastapi.testclient import TestClient
+from src.common import ML_ROOT
 from src.features.build import model_feature_columns
 from src.inference.api import app
 
 client = TestClient(app)
+MODELS_EXIST = (ML_ROOT / "models" / "varuna_bust_model.joblib").exists()
 
 
 def test_health_endpoint():
@@ -16,6 +18,7 @@ def test_health_endpoint():
     assert "models_ready" in data
 
 
+@pytest.mark.skipif(not MODELS_EXIST, reason="VARUNA model artifact (varuna_bust_model.joblib) not present on disk")
 def test_predict_endpoint():
     cols = model_feature_columns()
     payload = {
@@ -35,6 +38,7 @@ def test_predict_endpoint():
     assert isinstance(data["stabilizers"], list)
 
 
+@pytest.mark.skipif(not MODELS_EXIST, reason="VARUNA model artifact (varuna_bust_model.joblib) not present on disk")
 def test_predict_grid_endpoint():
     cols = model_feature_columns()
     payload = {

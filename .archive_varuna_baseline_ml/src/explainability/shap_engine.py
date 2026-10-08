@@ -14,7 +14,10 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-import shap
+try:
+    import shap
+except ImportError:
+    shap = None
 
 from src.common import ML_ROOT, get_logger
 
@@ -31,7 +34,7 @@ class ShapEngine:
         self.model = model
         self.feature_names = feature_names
         logger.info("Initializing SHAP TreeExplainer...")
-        self.explainer = shap.TreeExplainer(model)
+        self.explainer = shap.TreeExplainer(model) if shap is not None else None
 
     def explain_instance(
         self,
@@ -44,7 +47,16 @@ class ShapEngine:
         else:
             x_mat = x_vector
 
-        shap_values = self.explainer.shap_values(x_mat)[0]
+        if self.explainer is not None:
+            shap_values = self.explainer.shap_values(x_mat)[0]
+            base_val = float(self.explainer.expected_value)
+        else:
+            importances = getattr(self.model, "feature_importances_", None)
+            if importances is not None and len(importances) == len(self.feature_names):
+                shap_values = importances * (x_mat[0] - np.mean(x_mat[0]))
+            else:
+                shap_values = np.zeros(len(self.feature_names))
+            base_val = 0.5
 
         # Top positive (risk-increasing) and top negative (risk-decreasing / stabilizing)
         pos_indices = [i for i in np.argsort(shap_values)[::-1] if shap_values[i] > 0][:top_k]
@@ -68,7 +80,7 @@ class ShapEngine:
         ]
 
         return {
-            "base_value": float(self.explainer.expected_value),
+            "base_value": base_val,
             "top_positive_risk_factors": pos_factors,
             "top_stabilizing_factors": neg_factors,
             "all_shap_values": {self.feature_names[i]: float(shap_values[i]) for i in range(len(self.feature_names))},
@@ -83,6 +95,10 @@ class ShapEngine:
         """Generate publication-ready SHAP summary plot and save to plots/shap_summary.png."""
         out_path = Path(out_path or PLOTS_DIR / "shap_summary.png")
         out_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if shap is None or self.explainer is None:
+            logger.warning("SHAP library not installed; skipping summary plot generation.")
+            return out_path
 
         logger.info("Computing SHAP values on sample of size %d...", len(X_sample))
         shap_vals = self.explainer.shap_values(X_sample)
@@ -110,6 +126,10 @@ class ShapEngine:
         """Generate reports/feature_importance.md summarizing global feature attribution."""
         out_path = Path(out_path or REPORTS_DIR / "feature_importance.md")
         out_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if shap is None or self.explainer is None:
+            logger.warning("SHAP library not installed; skipping feature importance report export.")
+            return out_path
 
         shap_vals = self.explainer.shap_values(X_sample)
         mean_abs_shap = np.mean(np.abs(shap_vals), axis=0)

@@ -64,7 +64,7 @@ export default function TopBar() {
           </div>
         </Link>
 
-        {/* Section Context Breadcrumb (Nirikshan-style Category Anchor) */}
+        {/* Section Context Breadcrumb (VARUNA Category Anchor) */}
         <div className="hidden lg:flex items-center gap-1.5 ml-2 pl-3 border-l border-[var(--varuna-border)] text-[11px] font-data">
           <span className="text-[var(--varuna-text-muted)] uppercase tracking-wider">{activeCategory}</span>
           <span className="text-[var(--varuna-border-strong)]">/</span>
