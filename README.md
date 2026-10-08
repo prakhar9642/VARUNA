@@ -14,11 +14,6 @@
 > **Backend API:** [https://varuna-backend-grfc.onrender.com](https://varuna-backend-grfc.onrender.com)  
 > **API Health:** [https://varuna-backend-grfc.onrender.com/api/health](https://varuna-backend-grfc.onrender.com/api/health)  
 >  
-> **SIH 2026 Presentation Resources:**  
-> • **Official Demo Script & Recording Choreography (PDF):** [`VARUNA_SIH_FINAL_DEMO_SCRIPT.pdf`](VARUNA_SIH_FINAL_DEMO_SCRIPT.pdf) *(Under-3-minute timestamped recording guide & narration)*  
-> • **Interactive HTML Presentation Companion:** [`VARUNA_SIH_FINAL_DEMO_SCRIPT.html`](VARUNA_SIH_FINAL_DEMO_SCRIPT.html)  
-> • **Multi-Variable Validation Report:** [`varuna-backend/reports/MULTIVARIABLE_VALIDATION_REPORT.md`](varuna-backend/reports/MULTIVARIABLE_VALIDATION_REPORT.md)  
-> • **Empirical Validation Protocol:** [`varuna-backend/docs/VALIDATION_PROTOCOL.md`](varuna-backend/docs/VALIDATION_PROTOCOL.md)
 
 ---
 
